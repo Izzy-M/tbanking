@@ -442,17 +442,19 @@ function confirmdelivery(id){
         method:"POST",
         url:"reports",
         data:data,
-        beforeSend:(()=>{progress("Updating inventory")}),
+        beforeSend:(()=>{progress("Updating Inventory")}),
         complete:(()=>{progress()})}).fail(()=>{toast("Connection Error: Internet Connection was lost!")}).done(
         (e)=>{
             console.log(e.trim())
             if(e.trim()=="success"){
+                progress()
                 toast("Items have been added to inventory");
                 getcontent('reports?addproducts');
                 closepop();
-            window.open("delivery?orderid="+id,'_blank',noope);
+            window.open("balance?orderid="+id,'_blank');
             }
             else{
+                progress()
                 toast(e.trim())
             }
         })
@@ -762,6 +764,12 @@ function changejournal(date){
     )
 }
 function bsprint(){
-    window.open('balance',"_blank");
+    let data='balancesheet';
+    $.ajax({data:data,method:'POST',url:'balance'}).fail(
+        toast('An error Occured. Check your internent Connection')
+        ).done(()=>{
+            toast('Requesting document download');
+            window.open('balance?balancesheet','_blank');}
+        )
 }
 </script>
