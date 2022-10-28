@@ -191,8 +191,8 @@
 									$kcont=explode(",",str_replace(']','',str_replace('[','',$kindet)));
 									array_push($kinname,$kin);array_push($kincont,$kcont[0]);
 								}}
-								$kin=strlen(@$kinname[0])>2?ucwords(@$kinname[0]):"";
-								$cont=strlen(@$kincont[0])>5?'0'.ltrim(ltrim(clean(@$kincont[0]),"0"),"254"):''; $grp=$row['mgroup'];$dob=$row['dob'];
+								$kin=strlen(@$kinname[0])>2?ucwords(@$kinname[0]):"None";
+								$cont=strlen(@$kincont[0])>5?'0'.ltrim(ltrim(clean(@$kincont[0]),"0"),"254"):''; $grp=$row['mgroup'];$dob=strlen($row['dob'])>6?$row['dob']:'--/--/---';
 								$loan = "<button class='btnn' style='padding:4px;min-width:60px' onclick=\"popupload('members.php?assign=$mid')\"><i class='bi-plus-lg'></i> Assign</button>";
 									
 								$qri = mysqli_query($con,"SELECT *FROM `loans` WHERE `client`='$mid'");

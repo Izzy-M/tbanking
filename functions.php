@@ -142,7 +142,7 @@ $total=0;
 	return '<td>'.$imn.'</td><td>'.$total.'/=</td>';
 } 
 /**
-* Format purchase ored items and put them to table
+* Format purchase ordered items and put them to table
 */
  function decodeitems($str){
 $rt=explode(",",str_replace("{","",str_replace("}","",str_replace("[","",str_replace("]","",$str)))));
