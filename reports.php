@@ -94,7 +94,7 @@ if(isset($_GET['payments'])){
             }
             echo '</select></p>
             <p>Amount received<br><input type="number" name="currentpay" style="width:100%;max-width:300px;" required></p>
-            <p><button class="btnn" style="float:right;" onclick="invoicepayment(event)">Confirm</button></p.';
+            <p><button class="btnn" style="float:right;" onclick="invoicepayment(event)">Confirm</button></p><br><br>';
 }
 if(isset($_GET['purchase'])){
     echo '<div class="col-8 mx-auto" style="max-width:300px;width:100%;">
@@ -944,7 +944,7 @@ if(isset($_GET['blsheet'])){
    
     echo '<tr style="font-weight:bold;"><td style="text-align:center;border-top:1px solid;border-bottom:1px solid;">Total</td><td style="border-top:1px solid;border-bottom:1px solid;">'.$totalliab.'</td></tr><tr style="line-height:30px;padding:5px;"><td colspan="2" style="text-align:right;"></td></tr>';
     echo '</table>
-    <p><div class="row no-gutters" style="text-align:right;justify-content:right;margin-right:20px;"><button style="min-width:70px;width:fit-content;height:40px;color:white;background:#2f79bd;border:1px solid;border-radius:5px;" onclick="bsprint()"><i class="fa fa-print" style="color:red;"></i> Print</button></div></p><br>
+    <p><div class="row no-gutters" style="text-align:right;justify-content:right;margin-right:20px;"><button style="min-width:70px;width:fit-content;height:40px;color:white;background:#2f79bd;border:1px solid;border-radius:5px;float:right;" onclick="bsprint()"><i class="fa fa-print" style="color:red;"></i> Print</button></div></p><br>
     </div></div>';
 }
 #income statement
@@ -960,7 +960,7 @@ if(isset($_POST['bname'])){
     if(mysqli_num_rows($check)<1){
     $insert=mysqli_query($con,"INSERT INTO `bank_accounts` (`id`,`bank`,`account`) VALUES(NULL,'$name','$account')");
     if($insert){
-        echo 'success';
+        echo 'success';//Admin!1
     }
     else{
         echo 'fail';
@@ -1322,21 +1322,23 @@ $time=time();
                     $cbillid='BID'.$_SESSION['csysuser'].time();
                     $ins=mysqli_query($con,"INSERT INTO `bills`(`id`,`vendor`,`billid`,`item`,`qty`,`unit_price`,`balance`,`ddate`,`status`) VALUES(NULL,'$vnd','$cbillid','$product','$quantity','$price','$tbal','$due',0)");
                     $nchartbalance=$chbal+$tbal;
+                    $newcredbal=$credbal+$tbal;
                     $upch=mysqli_query($con,"UPDATE `chartsofaccount` SET `balance`='$nchartbalance' WHERE `id`='$chid'");
+                    $inventoryas=mysqli_query($con,"UPDATE `chartsofaccount` SET `balance`='$nchartbalance' WHERE `id`='$crid'");
                     $trid='PO'.$_SESSION['csysuser'].time();
-                    $insert=mysqli_query($con,"INSERT INTO `transactions` VALUES(NULL,'$time','$trid','Add $quantity $product to payable','$tbal','$chid')");
+                    $insert=mysqli_query($con,"INSERT INTO `transactions` VALUES(NULL,'$time','$month','$trid','Add $quantity $product to payable','$tbal','$chid')");
                     $month=strtotime(date('Y-M',time()));
-                   mysqli_query($con,"INSERT INTO `transactions` VALUES(NULL,'$time','$month','$trid','Add $quantity $product to inventory','$credbal','$crid')");
+                    mysqli_query($con,"INSERT INTO `transactions` VALUES(NULL,'$time','$month','$trid','Add $quantity $product to inventory','$credbal','$crid')");
                     
                     if($ins && $insert && $upch){
                          $ms="success";
                     }
                     else{
-                        echo 'failup';
                         mysqli_query($con,"DELETE FROM `bills` WHERE `status`=0 AND `item`='$product' AND `balance`='$tbal'");
                         mysqli_query($con,"UPDATE `balance`='$chbal' WHERE `id`='$chid'");
+                        mysqli_query($con,"UPDATE `balance`='$credbal' WHERE `id`='$crid'");
                         mysqli_query($con,"DELETE FROM `transactions` WHERE `transactionid`='$trid'");
-                        
+                        echo 'failup';
                     }
                }
             }
