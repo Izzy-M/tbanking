@@ -1,6 +1,6 @@
 <?php
 	session_start();
-	$currentgrp=$_SESSION['grptable'];
+	$currentgrp=isset($_SESSION['grptable'])?$_SESSION['grptable']:'';
 	require "functions.php";
 	$con = mysqli_connect("localhost",DB_USER,DB_PASS,DB_NAME);
 	function message($name,$email,$password,$pos){
@@ -17,7 +17,7 @@
 		return $dt;
 	}
 
-	#add products
+#add products
 	if(isset($_POST['pname'])){
 		$name = strtolower(clean($_POST['pname']));
 		$amnt = clean($_POST['lamnt']);
@@ -32,7 +32,7 @@
 			else{ echo "Failed to complete the request! Try again later"; }
 		}
 	}
-	#save group
+#save group
 	if(isset($_POST['gname'])){
 		$name = strtolower(clean($_POST['gname']));
 		$loc=clean($_POST['loc']);
@@ -57,7 +57,7 @@
 				echo "Failed to complete the request! Try again later"; }
 		}
 	}
-		#add save type
+#add save type
 	if(isset($_POST['sname'])){
 			$sname=clean($_POST['sname']);
 			$int=clean($_POST['int']);
@@ -70,7 +70,7 @@
 				echo "fail".mysqli_error($con);
 			}
 		}
-		#add loan type
+#add loan type
 	if(isset($_POST['lname'])){
 		$sname=clean($_POST['lname']);
 		$int=clean($_POST['intr']);
@@ -118,7 +118,7 @@
 		
 	}
 	
-	# save member
+# save member
 	if(isset($_POST['allkin'])){
 		$cname = clean(strtolower($_POST['name']));
 		$kinsdata =strtolower($_POST['allkin']);
@@ -168,7 +168,7 @@
 			else{ echo "Failed: Unknown Error occured"; }
 		}
 	}
-	#give loan
+#give loan
 	if(isset($_POST['client'])){
 		$client=$_POST['client'];
 		$amount=clean($_POST['amount']);
@@ -211,7 +211,7 @@
 			echo "low";
 		}
 	}
-	#saving to member account
+#saving to member account
 	if(isset($_POST['investor'])){
 		$client=$_POST['investor'];
 		$other=$_POST['other'];
@@ -244,7 +244,7 @@
 		}
 		}
 	
-	#pay loan
+#pay loan
 	if(isset($_POST['payee'])){
 		$payee=$_POST['payee'];
 		$grp=$_POST['lngr'];
@@ -287,7 +287,7 @@
 				}
 			
 	}
-	#group fines
+#group fines
 	if(isset($_POST['groupid'])){
 		$grp=$_POST['groupid'];
 		$client=$_POST['userid'];
@@ -299,7 +299,7 @@
 			echo 'fail';
 		}
 	}
-	#update user position
+#update user position
 	if(isset($_POST['cuserid'])){
 		$sid=$_POST['cuserid'];
 		$pos=$_POST['cpos'];
@@ -311,7 +311,7 @@
 			echo 'fail';
 		}
 	}
-	#update group name
+#update group name
 	if(isset($_POST['cgroup'])){
 		$grp=clean($_POST['cgroup']);
 		$name=clean($_POST['grpname']);
@@ -330,6 +330,7 @@
 			echo 'fail';
 		}
 	}
+#Add new charges	
 	if(isset($_POST['cname'])){
 		$cnm=clean($_POST['cname']);
 		$amount=clean($_POST['camount']);
@@ -347,7 +348,7 @@
 			}
 		}
 	}
-	//get external debt
+#get external debt
 	if(isset($_POST['dtgroup'])){
 		$amount=$_POST['damount'];
 		$grp=$_POST['tgrp'];
@@ -363,7 +364,7 @@
 			echo 'fail';
 		}
 	}
-	#witdraw funds
+#witdraw funds
 	if(isset($_POST['groupaccount'])){
 		$account=$_POST['groupaccount'];
 		$amount=clean($_POST['wamaount']);
@@ -413,7 +414,7 @@
 		}
 		
 	}
-	#delete member
+#delete member
 	if(isset($_POST['delmember'])){
 		$del=$_POST['delmember'];
 		$delete=mysqli_query($con,"UPDATE `members` SET `status`=4 WHERE `id`='$del'");
@@ -424,7 +425,7 @@
 			echo "fail";
 		}
 	}
-	#delete  group
+#delete  group
 	if(isset($_POST['deletegroup'])){
 		$group=$_POST['deletegroup'];
 		$delegroup=mysqli_query($con,"UPDATE `groups` SET `status`=4 WHERE `id`='$group'");
@@ -438,7 +439,7 @@
 			}
 		}
 	}
-	#add position
+#add position
 	if(isset($_POST['pos'])){
 		$pos=clean($_POST['pos']);
 		$get=mysqli_query($con,"SELECT * FROM `grouppositions` WHERE `position` LIKE '%$pos%'");
@@ -451,7 +452,7 @@
 		}
 		}
 	}
-	#update member detaild
+#update member detaild
 	if(isset($_POST['updatee'])){
 		$member=$_POST['updatee'];
 		$username=$_POST['username'];
@@ -467,37 +468,32 @@
 			echo "fail";
 		}
 	}
-	#external loan
+#external loan
 	if(isset($_POST['tgrp'])){
 		$grp=$_POST['tgrp'];
-		$group=$_POST['dbtgroup'];
+		$lender=$_POST['lenderid'];
 		$amount=$_POST['damount'];
 		$period=$_POST['period'];
 		$time=time();
-		$checks= mysqli_query($con,"SELECT `cpool` FROM `groups` WHERE `id`='$group' FOR UPDATE");
+		$checks=mysqli_query($con,"SELECT `cpool` FROM `groups` WHERE `id`='$grp' FOR UPDATE");
 		foreach($checks as $check){
 			$currentamount=$check['cpool'];
-			if($currentamount>=$amount){
-				$bal=$currentamount-$amount;
-				$update= mysqli_query($con,"UPDATE `groups` SET `cpool`='$bal' WHERE `id`='$group'");
+				$newamount=$currentamount+$amount;
+				$update=mysqli_query($con,"UPDATE `groups` SET `cpool`='$newamount' WHERE `id`='$grp'");
 				if($update){
-					$insert= mysqli_query($con,"INSERT INTO `debts`(`id`,`borrower`,`lender`,`amount`,`period`,`time`) VALUES(NULL,'$grp','$group','$amount','$period','$time')");
+					$insert=mysqli_query($con,"INSERT INTO `debts`(`id`,`borrower`,`lender`,`amount`,`period`,`time`) VALUES(NULL,'$grp','$lender','$amount','$period','$time')");
 					if($insert){
 						echo 'success';
-					}else{
-						$update= mysqli_query($con,"UPDATE `groups` SET `cpool`='$currentamount' WHERE `id`='$group'");
-						echo 'fail';
+					}
+					else{
+						echo 'fail'.mysqli_error($con);
 					}
 				}else{
-					echo 'fail';
+					echo 'fail'.mysqli_error($con);
 				}
 			}
-			else{
-				echo 'fail';
-			}
-		}
 	}
-	#record expenses
+#record expenses
 	if(isset($_POST['expense'])){
 		$group=$_POST['expgroup'];
 		$exp=$_POST['expense'];
@@ -507,7 +503,7 @@
 		$time=time();
 		$insert=mysqli_query($con,"INSERT INTO `expenses`(`id`,`groupid`,`expense`,`paymethod`,`receiver`,`paid`,`time`) VALUES(NULL,'$group','$exp','$method','$receiver','$amount','$time')");
 		if($insert){echo 'success';}else{echo 'fail';}}
-	#office expense
+#office expense
 	if(isset($_POST['offexpense'])){
 		$group=$_POST['offpgroup'];
 		$exp=$_POST['offexpense'];
@@ -515,7 +511,7 @@
 		$time=time();
 		$insert=mysqli_query($con,"INSERT INTO `officeexpense`(`id`,`grp`,`amount`,`payment`,`time`) VALUES(NULL,'$group','$amount','$exp','$time')");
 		if($insert){echo 'success';}else{echo 'fail';echo mysqli_error($con);}}
-	#change deposit
+#change deposit
 	if(isset($_POST['gedit'])){
 		$id=$_POST['gedit'];
 		$amount=$_POST['eamount'];
@@ -528,6 +524,7 @@
 			echo "fail";
 		}
 	}
+#delete deposit type	
 	if(isset($_POST['deldepo'])){
 		$id=$_POST['deldepo'];
 		$query=mysqli_query($con,"DELETE FROM `savings` WHERE `id`='$id'");
@@ -538,7 +535,7 @@
 			echo mysqli_error($con);echo "fail";
 		}
 	}
-	#get depotypes
+#get depotypes
 	if(isset($_GET['depotypes'])){
 		$select=mysqli_query($con,"SELECT * FROM `deposittypes`");
 		if(mysqli_num_rows($select)>0){
@@ -548,7 +545,7 @@
 			}
 		}
 	}
-	##search
+#search member from 
 	if(isset($_POST['sqterm'])){
 		$term=clean($_POST['sqterm']);
 		$getall=mysqli_query($con,"SELECT * FROM `members` WHERE `name` LIKE '%$term%' OR `idno` LIKE'%$term%' OR `phone` LIKE '%$term%' OR `sysnum` LIKE '%$term%'");
@@ -591,7 +588,7 @@
 			echo '<tr><td colspan="6" style="text-align:center;">Sorry, There is no a member matching the key provided</td></tr>';
 		}
 	}
-	#all members
+#get all members
 	if(isset($_GET['allmembers'])){
 		$sql = mysqli_query($con,"SELECT *FROM `members` WHERE `status`=1 ORDER BY `name` ASC");
 		foreach($sql as $row){
@@ -627,8 +624,7 @@
 			<td>$grpname<br><span style='color:grey;font-size:14px'>0$fon</span></td><td>$kin<br><span style='color:grey;font-size:14px'>$cont</span></td><td>$loan</td></tr>";
 			}
 	}
-
-	#fetch user details;
+#fetch user details;
 	if(isset($_GET['userdetails'])){
 		$user=$_GET['userdetails'];
 		echo '<div class="col-8 mx-auto" style="max-width:300px;justify-content:center;border:none; font-family:cambria;">
@@ -646,22 +642,21 @@
 			<tr><td style="font-weight:500;">Member No</td>
 			</td><td>'.$m['sysnum'].'</td></tr><tr><td style="font-weight:500;">DOB</td>
 			</td><td>'.$m['dob'].'</td></tr></p>';
-					if(strlen($m['nextkin'])>2){
-						echo '<tr style="background:#f2f6fc;color:#191970;font-weight:bold;font-size:14px;font-family:cambria;line-height:30px;margin-top:5px;"><td colspan="2">Next of Kin details</td></tr>';
-						foreach(json_decode($m['nextkin'],1) as $kin=>$knv){
-							$vls=explode(",",str_replace("[","",str_replace("]","",$knv)));
-							$vl=(int)$vls[1]>0?@$vls[1]:0;
-							echo '<tr><td>Name</td><td>'.ucwords($kin).'</div></div>
-							<tr><td>Contact</td><td>'.$vls[0].'</div></div>
-							<tr><td>Percentage</td><td>'.$vl.'%</td></tr>';
-							
-							}
-					}
+				if(strlen($m['nextkin'])>2){
+					echo '<tr style="background:#f2f6fc;color:#191970;font-weight:bold;font-size:14px;font-family:cambria;line-height:30px;margin-top:5px;"><td colspan="2">Next of Kin details</td></tr>';
+					foreach(json_decode($m['nextkin'],1) as $kin=>$knv){
+						$vls=explode(",",str_replace("[","",str_replace("]","",$knv)));
+						$vl=(int)$vls[1]>0?@$vls[1]:0;
+						echo '<tr><td>Name</td><td>'.ucwords($kin).'</div></div>
+						<tr><td>Contact</td><td>'.$vls[0].'</div></div>
+						<tr><td>Percentage</td><td>'.$vl.'%</td></tr>';
+						}
+				}
 				echo '</table><br></div>';
 				}
 	}
-	#risk collection
-	if(isset($_POST['riskamt'])){
+#risk collection
+	/*if(isset($_POST['riskamt'])){
 		$risk=clean($_POST['riskamt']);
 		$member=$_POST['member'];
 		$time=time();
@@ -673,8 +668,8 @@
 		else{
 			echo "fail";echo mysqli_error($con);
 		}
-	}
-	#ssesion groups
+	}*/
+#ssesion groups
 	if(isset($_POST['setgroup'])){
 		$table=$_POST['setgroup'];
 		$_SESSION['grptable']=$table;
@@ -682,7 +677,7 @@
 			echo "success";
 		}else{echo "fail";}
 		}
-	#employ login
+#employ login
 	if(isset($_POST['currentuser'])){
 		$user=clean($_POST['currentuser']);
 		$pass=clean($_POST['password']);
@@ -703,6 +698,7 @@
 			echo "not found";
 		}
 	}
+#add new employee
 	if(isset($_POST['employname'])){
 		$employee=clean($_POST['employname']);
 		$phone=clean($_POST['phone']);
@@ -734,6 +730,7 @@
 				echo "found";
 		}
 	}
+#pay external debt
 	if(isset($_POST['dbtid'])){
 
 		$debt=$_POST['dbtid'];
@@ -758,6 +755,7 @@
 			echo 'no debt';
 		}
 	}
+#alldeposit API
 	if(isset($_GET['alldepos'])){
 		$alldepos=mysqli_query($con,"SELECT * FROM `deposittypes`");
 		if(mysqli_num_rows($alldepos)>0){
@@ -767,7 +765,8 @@
 		}else{
 			echo '<option>No Deposit types</option>';
 		}
-}
+	}
+#All loans API
 	if(isset($_GET['getallloans'])){
 		$cli=$_GET['getallloans'];
 		$all=mysqli_query($con,"SELECT `ln`.`id`,`tp`.`name`,`ln`.`paid`,`ln`.`history` FROM `loans` as `ln` INNER JOIN `loantype` as `tp`  ON `ln`.`loantype`=`tp`.`id` WHERE `ln`.`paid`<`ln`.`history` AND `ln`.`client`=$cli");
@@ -777,7 +776,7 @@
 		}
 
 	}
-	
+#Daily Activity module
 	if(isset($_POST['acmember'])){
 		$member=$_POST['acmember'];
 		$loans=$_POST['loans'];
@@ -874,9 +873,38 @@
 		else{
 			mysqli_query($con,"DELETE `savings` WHERE `client`='$member' AND `time`='$now'");
 		echo 'Sorry! You request can not be compeleted at the moment!';
-		}
-		
-		
+		}	
 	}
+#Add new lender type
+	if(isset($_POST['lendername'])){
+		$name=clean(strtolower($_POST['lendername']));
+		$type=clean($_POST['lendertype']);
+		$find=mysqli_query($con,"SELECT * FROM `lenders` WHERE `name`='$name'");
+		if(mysqli_num_rows($find)<1){
+			$insert= mysqli_query($con,"INSERT INTO `lenders` VALUES(NULL,'$name','$type')");
+			if($insert){
+				echo 'success';
+			}
+			else{
+				echo 'fail'.mysqli_error($con);
+			}
+		}
+		else{
+			echo 'found';
+		}
+	}
+#get external loan categories
+if(isset($_GET['category'])){
+	$cattype=$_GET['category'];
+	$getcats=mysqli_query($con,"SELECT `id`,`name` FROM `lenders` WHERE `category`='$cattype'");
+	if(mysqli_num_rows($getcats)>0){
+		foreach($getcats AS $gtcat){
+			echo '<option value="'.$gtcat['id'].'">'.ucwords($gtcat['name']).'</option>';
+		}
+	}
+	else{
+		echo '<option>--No lender type --</option>';
+	}
+}
 mysqli_close($con);
 ?>
