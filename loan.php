@@ -1,5 +1,4 @@
 <?php
-	
 	require "functions.php";
 	$con = mysqli_connect("localhost",DB_USER,DB_PASS,DB_NAME);
 	if(isset($_SESSION['grptable'])){
