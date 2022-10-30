@@ -104,8 +104,8 @@
 				<input type='number' min='0' style='width:100%;max-width:300px;' name='camount' required></p>
 				<p>Collection<br>
 				<select style='width:100%;max-width:300px;' name='collection'>
-				<option value='1'> Group</option>
-				<option value='2'>Company</option>
+				<option value='1'>Group</option>
+				<option value='2'>Office</option>
 				</select></p>
 				<p style='text-align:right'><button class='btnn'>Add</button></p><br>
 			</form><br>

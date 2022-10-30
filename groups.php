@@ -146,10 +146,10 @@ $ccgrp=$_SESSION['grptable'];
 			$first=strtotime("first day of last month");
 			$last=strtolower("last day of last month");
 			$cashin=0;
-				$fines=mysqli_query($con,"SELECT `fin`.`amount`,`chty`.`name`,`memb`.`sysnum`,`memb`.`name` as `mna` FROM `fines` AS `fin` INNER JOIN `members` AS `memb` ON `fin`.`client`=`memb`.`id` INNER JOIN `chargetypes` AS `chty` ON `fin`.`charges`=`chty`.`id` WHERE `memb`.`mgroup`='$ccgrp' AND `date`<'$last'");
+				$fines=mysqli_query($con,"SELECT `fin`.`amount`,`chty`.`name`,`memb`.`sysnum`,`memb`.`name` as `mna` FROM `fines` AS `fin` INNER JOIN `members` AS `memb` ON `fin`.`client`=`memb`.`id` INNER JOIN `chargetypes` AS `chty` ON `fin`.`charges`=`chty`.`id` WHERE `memb`.`mgroup`='$ccgrp'");
 				$totalfines=0;
 				foreach($fines as $fine){
-					echo '<tr><td>'.$fine['sysnum'].' '.$fine['mna'].'</td><td>'.$fine['name'].'</td><td style="width:80px;">'.$fine['amount'].'</td></tr>';
+					echo '<tr><td>'.$fine['mna'].'</td><td>'.$fine['name'].'</td><td style="width:80px;">'.$fine['amount'].'</td></tr>';
 						$totalfines=$totalfines+$fine['amount'];
 					
 					}
@@ -166,7 +166,7 @@ $ccgrp=$_SESSION['grptable'];
 				foreach(json_decode($repay['phistory'],1) as $k=>$v){
 					$tv=$tv+$v;
 					array_push($application,array($repay['sysnum']=>$repay['appfee']));
-				if(($k>=$first) && ($k<$last)){
+				if($k<$last){
 				$app=$app+$repay['appfee'];$loans=$loans+$repay['paid'];
 					echo '<tr><td>'.$repay['sysnum'].'</td><td>'.$repay['loan'].'</td><td style="width:80px;">'.($loans-$app).'</td></tr>';
 					}
@@ -180,37 +180,31 @@ $ccgrp=$_SESSION['grptable'];
 			
 			<div class="row no-gutters" style="font-weight:600;justify-content:center;font-weight:600;">Loan application fee</div>
 			<table style="width:100%;max-width:900px;min-width:200px">';
-			$repayment=mysqli_query($con,"SELECT `ap`.`history`,`sysnum`,`ap`.`loan`FROM `groups` AS `gr` INNER JOIN `members` AS `m` ON `m`.`mgroup`=`gr`.`id` INNER JOIN `applicationfee` AS `ap` ON `ap`.`client`=`m`.`id` WHERE `gr`.`id`='$ccgrp'");
+			$repayment=mysqli_query($con,"SELECT `ap`.`history`,`m`.`name`,`ap`.`loan`FROM `groups` AS `gr` INNER JOIN `members` AS `m` ON `m`.`mgroup`=`gr`.`id` INNER JOIN `applicationfee` AS `ap` ON `ap`.`client`=`m`.`id` WHERE `gr`.`id`='$ccgrp'");
 			$fee=0;
 			foreach($repayment as $repay){
 				foreach(json_decode($repay['history'],1) as $k=>$v){
-				if($k>=$first && $k<=$last){
 				$fee=$fee+$v;
-					echo '<tr><td>'.$repay['sysnum'].'</td><td>'.$repay['loan'].'</td><td style="width:80px;">'.($v).'</td></tr>';
-					}
+					echo '<tr><td>'.$repay['name'].'</td><td>'.$repay['loan'].'</td><td style="width:80px;">'.($v).'</td></tr>';
 				}
 			}
 			$cashin=$cashin+$fee;
 			echo '<tr style="font-weight:600;background:white;border-top:2px solid;border-bottom:1px solid;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;margin-left:10px;">'.$fee.'/=</td></tr></table><div class="row no-gutters" style="justify-content:center;font-weight:600;">Group Savings</div><table style="width:100%;min-width:200px;max-width:900px;"><tr><th>MNo</th><th>Type</th><th>Amount</th></tr>';
-			$savs=mysqli_query($con,"SELECT `saving`,`mb`.`sysnum`,`dep`.`type` FROM `savings` AS `sav` INNER JOIN `members` AS `mb` ON `mb`.`id`=`sav`.`client` INNER JOIN `deposittypes` AS `dep` ON `sav`.`type`=`dep`.`id` WHERE `mgroup`='$ccgrp' AND `sav`.`month`='$first'");
+			$savs=mysqli_query($con,"SELECT SUM(saving) AS `saving`,`mb`.`name`,`dep`.`type` FROM `savings` AS `sav` INNER JOIN `members` AS `mb` ON `mb`.`id`=`sav`.`client` INNER JOIN `deposittypes` AS `dep` ON `sav`.`type`=`dep`.`id` WHERE `mgroup`='$ccgrp' GROUP BY `dep`.`type`");
 			$savn=0;
 			if(mysqli_num_rows($savs)>0){
 			foreach($savs as $sav){
 				$savn=$savn+$sav['saving'];
-				echo '<tr><td>'.$sav['sysnum'].'</td><td>'.$sav['type'].'</td><td style="width:80px;">'.$sav['saving'].'</td></tr>';}
+				echo '<tr><td>'.$sav['name'].'</td><td>'.$sav['type'].'</td><td style="width:80px;">'.$sav['saving'].'</td></tr>';}
 			}
 			$cashin= $cashin+$savn;
 			echo '<tr style="border-top:2px solid;border-bottom:1px solid;font-weight:600;background:white;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;">'.$savn.'/=</td></tr></table>';
 			echo '<div class="row no-gutters" style="justify-content:center;font-weight:600;">External Debts</div><table style="width:100%;min-width:200px;max-width:900px;"><tr><th>Lenders</th><th>Amount</th></tr>';
-			$debts=mysqli_query($con,"SELECT `dbt`.`amount`,`dbt`.`time`,`lg`.`name` FROM `debts` AS `dbt` INNER JOIN `groups` AS `lg` ON `dbt`.`lender`=`lg`.`id` WHERE `lender`='$ccgrp' AND `paid`>0");
+			$debts=mysqli_query($con,"SELECT `dbt`.`amount`,`dbt`.`time`,`lg`.`name`,`dbt`.`paid` FROM `debts` AS `dbt` INNER JOIN `lenders` AS `lg` ON `dbt`.`lender`=`lg`.`id` WHERE `dbt`.`borrower`='$ccgrp' AND `dbt`.`paid`<`dbt`.`amount`");
 			$amount=0;
 			foreach($debts as $debt){
-				foreach(json_decode($debt,1) as $k=>$v){
-					if($k>=$first){
-					echo '<tr><td>'.$debt['name'].'</td><td>'.$debt['amount'].'</td></tr>';
-					}
+				echo '<tr><td>'.ucwords($debt['name']).'</td><td>'.($debt['amount']-$debt['paid']).'</td></tr>';
 				$amount=$amount+$debt['amount'];
-				}
 			}
 			$cashin=$cashin+$amount;
 			echo '<tr style="border-top:2px solid;border-bottom:1px solid;font-weight:600;background:white;"><td style="text-align:center;">Subtotal</td><td style="text-align:end;" >'.$amount.'/=</td></tr></table>
@@ -761,28 +755,46 @@ $ccgrp=$_SESSION['grptable'];
 		  echo '<tr style="line-height:30px;"><td colspan="4"></td></tr><tr style="background:#ffffff;line-height:30px;"><th colspan="4" style="padding:0px 20px;"><div class="row no-gutters"><div></th></tr>';
 		
 	}
-	#take debt
+#take debt
 	if(isset($_GET['takedebt'])){
 		$grp=$_GET['takedebt'];
 		echo '<div class="col-8 mx-auto" style="max-width:300px;">
 		<div class="row no-gutters" style="justify-content:center;"><h3 style="text-align:center;color:#191970;font-size:23px;margin:0px">External Debts</h3></div>
 		<form id="exdt" method="post">
 		<input type="hidden" name="tgrp" value="'.$grp.'">
-		<p><div class="row no-gutters">Lender group</div>
-		<div class="row no-gutters"><select name="dbtgroup" style="max-width:300px;width:100%;">';
-		$grops=mysqli_query($con,"SELECT `id`,`name` FROM `groups`");
-		foreach($grops as $grop){
-			if($grop['id']!==$grp){
-			echo '<option value="'.$grop['id'].'">'.$grop['name'].'</option>';
+		<p><div class="row no-gutters">Lender type</div>
+		<div class="row no-gutters"><select style="max-width:300px;width:100%;" onchange="lendercategory(this.value)">';
+		$fcy=[];
+		$fingroups=mysqli_query($con,"SELECT `category` FROM `lenders` GROUP BY `category`");
+		if(mysqli_num_rows($fingroups)>0){
+			foreach($fingroups AS $fngrps){
+				array_push($fcy,$fngrps['category']);
+				echo '<option value="'.$fngrps['category'].'">'.ucwords($fngrps['category']).'</option>';
 			}
+
+		}
+		else{
+			echo '<option>-- Not Available --</option>';
+		}
+		echo '</select></div></p>
+		<p><div class="row no-gutters">Lender group</div>
+		<div class="row no-gutters"><select name="lenderid" id="lenderid" style="max-width:300px;width:100%;">';
+		$categories= mysqli_query($con,"SELECT `id`,`name` FROM `lenders` WHERE `category`='$fcy[0]'");
+		if(mysqli_num_rows($categories)>0){
+			foreach($categories AS $cat){
+				echo '<option value="'.$cat['id'].'">'.ucwords($cat['name']).'</option>';
+			}
+		}
+		else{
+			echo '<option>-- No category --</option>';
 		}
 		echo '</select></div></p>
 		<p><div class="row no-gutters">Debt amount</div>
 		<div class="row no-gutters"><input type="number" name="damount" style="width:100%;"></div></p>
 		<p><div class="row no-gutters">Period</div>
 		<div class="row no-gutters"><input type="number" name="period" style="width:100%;"></div></p><br>
-		<div class="row no-gutters" style="justify-content:end;"><button class="btn btn-success">Confirm
-		</button></div></form>
+		<p><div class="row no-gutters" style="justify-content:end;"><button class="btn btn-success">Add
+		</button></div></p></form>
 		</div>
 		</div>';
 	}
@@ -1886,9 +1898,10 @@ $("#exdt").on("submit",(e)=>{
 			()=>{toast("An Error occured Updating debt")}
 		).done((e)=>{
 			let dt=e.trim();
+			console.log(dt)
 			if(dt=="success"){
 				closepop();
-				toast("Request successful!")
+				toast("Request compeleted successfully!")
 			}
 			else{
 				toast("Request failed!");
@@ -2169,19 +2182,29 @@ let len=narr.length;
 	let loan=loans.replace(/(^,)|(,$)/g, '');
 	let deposit=deposits.replace(/(^,)|(,$)/g, '');
 	let data='acmember='+narr[0].value+'&loans={'+loan+'}&deposits={'+deposit+'}&risk='+narr[len-2].value+'&recdate='+narr[len-1].value;
-	$.ajax({method:'POST',data:data,url:'savemember'}).fail(()=>{toast("Request failed!")}).done(
+	$.ajax({method:'POST',data:data,url:'savemember'}).fail(()=>{toast("Connection Error! Check your internet connection and try again!")}).done(
 		(e)=>{
 			console.log(e.trim())
 			if(e.trim()=="success"){
 				getgroupops(currentgroup)
 				closepop();
-				toast("Request compeleted successfull!");
+				toast("Request compeleted successfully!");
 			}
 			else{
-
+				toast("Sorry, Your request could not be completed!")
 			}
 		}
 	)
-
 })
+function lendercategory(name){
+	let req='category='+name;
+    $.ajax({method:'GET',data:req,url:'savemember'}).fail(()=>{
+		
+		toast("Connection Error! Check your internet connection and try again!")}
+	).done(
+		(e)=>{
+			$("#lenderid").html(e.trim())
+		}
+	)
+}
 </script> 
