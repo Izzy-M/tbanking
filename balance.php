@@ -68,6 +68,7 @@ if(isset($_GET['orderid'])){
 $style=file_get_contents('docs/bootstrap.min.css');
 $mpdf= new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4-P']);
 $data='<div style="max-width:800px;width:95%;margin:0 auto;">
+<div style="font-size:10px;text-align:right;width:100%;">'.date('l d-m-Y H:i:s',time()).'</div>
 <div style="font-size:23px;color:;width:100%;text-align:center;"><h4> Goods Delivery Note</h4></div>
 <div style="height:80px;width:96%;background:#191970;text-align:center;"> <img src="assets/img/logo.png" style="height:60px;width:80px;"/></div>';
     $allorders=mysqli_query($con,"SELECT `po`.*,`v`.`name`,`v`.`address`,`v`.`contact`,`v`.`email` FROM `purchase_orders` AS `po` INNER JOIN `vendors` AS `v` ON `v`.`id`=`po`.`vendor` WHERE `po`.`id`=1");
@@ -100,9 +101,7 @@ $data='<div style="max-width:800px;width:95%;margin:0 auto;">
     Sign:______________________________ <br>
     Date:______________________________<br>
     </div></div>
-    <div style="width:100%;display:flex;flex-direction:row;margin-top:10px;margin-bottom:20px;">
-    <button class="btnn" style="color:white;width:fit-content;background:green;float:right;" onclick="confirmdelivery('.$order['id'].')">Receive</button>
-    </div></div>';
+    <div style="width:100%;display:flex;flex-direction:row;margin-top:10px;margin-bottom:20px;"></div></div>';
     //$mpdf->WriteHTML($style,\Mpdf\HTMLParserMode::HEADER_CSS);
     $mpdf->WriteHTML($data,\Mpdf\HTMLParserMode::HTML_BODY);
     $mpdf->text_input_as_HTML=true;
