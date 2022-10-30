@@ -33,7 +33,7 @@ echo '<div class="container-fluid">
     <div class="row no-gutters setopt" onclick="addloan()"><i class="bi bi-plus" style="color:green;font-size:20px;"></i>&nbsp; Add new loan type</div>
     <div class="row no-gutters setopt" onclick="editloan()"><i class="fa fa-pencil-alt" style="font-size:20px;color:green;"></i> &nbsp; Edit loan type</div>
     <div class="row no-gutters setopt" onclick="deleteloan()"><i class="fa fa-times-circle" style="color:red;font-size:20px;"></i> &nbsp; Delete Loan type</div>
-    <!--<div class="row no-gutters setopt" onclick="deleteloan()"><i class="fa fa-trash" style="color:red;font-size:20px;"></i> &nbsp; Deleted Loantypes</div>-->
+    <div class="row no-gutters setopt" onclick="externallender()"><i class="fa fa-university" style="color:#4682b4;font-size:20px;"></i> &nbsp; Add external lender</div>
     <!--<div class="row no-gutters setopt"><i class="fa fa-edit"></i> &nbsp; Edit member loan</div>-->
 
      </div></div>
@@ -190,7 +190,18 @@ if(isset($_GET['updtemployee'])){
         </br></form>
         </div>';
         }
-    
+    if(isset($_GET['newlender'])){
+        echo '<div class="col-6 mx-auto" style="max-width:300px;"><div style="text-align:center;"><h4>Add New lender</h4></div>
+        <form id="newlender" method="post"">
+        <p>Lender Name<br>
+        <input type="text" name="lendername" style="width:100%;" required></p>
+        <p>Lender type<br><select name="lendertype" style="max-width:300px;width:100%;">';
+        echo '<option value="office">Office lending</option><option value="bank">Bank Loan</option><option value="sacco">SACCO Loan</option>';
+        echo '</select></p><br>
+        <div class="row no-gutters" style="justify-content:end;"><button class="btnn">Add</button></div>
+        </br></form>
+        </div>';
+    }
    
 ?>
 <script>
@@ -203,6 +214,7 @@ function editgroups(){fetchpage("managesettings?editgroup")}
 function updateemployee(id){popupload("managesettings?cemployee")}
 function updateposition(id){popupload("settings?updtemployee="+id)}
 function loadpositions(){popupload("settings?ldpositions")}
+function externallender(){popupload('settings?newlender')}
 function loandelete(id){
     let data="deleteloan="+id;
     let confirmed=confirm('Do you want to delete the selected loan type?');
@@ -233,6 +245,7 @@ function deleteemployee(id){
         }
     })}
 }
+
 $("#addposition").on("submit",(e)=>{
     e.preventDefault();
     let data=$("#addposition").serialize();
@@ -314,6 +327,25 @@ $("#newemployee").on("submit",(e)=>{
         }})
             
     })
+    $("#newlender").on("submit",(e)=>{
+     e.preventDefault();
+    let data=$("#newlender").serialize();
+    $.ajax({method:"POST",url:"savemember",data:data,
+        beforeSend:()=>{progress("Adding New lender");},
+        complete:()=>{progress();}
+        }).fail((e,ht,error)=>{toast("Error:Internet Connection error! Try again later");}).done(
+        (e)=>{
+            console.log(e.trim());
+            if(e.trim()=="success"){
+            _("newlender").reset();
+        closepop();toast("Request completed successfully!");
+        }else if(e.trim()=="found"){
+            toast("The lender name is already in the system!");
+        }else{
+            toast("Sorry the request could not be compeleted!")
+        }})
+            
+    })
 function deactivategp(id){
         let data="deactivategroup="+id;
         let confirmed=confirm('Do you want to deactivate the selected Group?');
@@ -322,13 +354,13 @@ function deactivategp(id){
             beforeSend:()=>{progress("Processing request..")},
             complete:()=>{progress()}
             }).fail(
-                ()=>{toast("No Connection: Sorry you lost internet connection");
+                ()=>{toast("Network Connection LOst: Sorry you lost internet connection");
                     }).done(
                         (e)=>{
                     if(e.trim()=="success"){
                         toast("Group deactivated successfully!");deactivategroup();
                     }else{
-                        toast("Action failed");}
+                        toast("Request failed");}
                     }
                 )}
     }
@@ -431,4 +463,5 @@ function deleteaccount(id){
                 }
             })
 }
+
 </script>
