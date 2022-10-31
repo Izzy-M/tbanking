@@ -732,24 +732,35 @@
 	}
 #pay external debt
 	if(isset($_POST['dbtid'])){
-
+		$currentgroup=$_POST['currentgroup'];
 		$debt=$_POST['dbtid'];
 		$amountpaid=clean($_POST['dbtpay']);
 		$time=time();
-
 		$checks=mysqli_query($con,"SELECT * FROM `debts` WHERE `id`='$debt' FOR UPDATE");
-		if(mysqli_num_rows($checks)>0){
+		$groupaccount=mysqli_query($con,"SELECT `cpool` FROM `groups` WHERE `id`='$currentgroup' FOR UPDATE");
+		foreach($groupaccount AS $account){$currentamount=$account['cpool'];}
+		if(mysqli_num_rows($checks)===1){
 			foreach($checks as $check){
 			$adebt=$check['amount'];$paid=$check['paid'];
 			}
-			$tpaid=$paid+$amountpaid;
-			$info='"'.$time.'":"'.$amountpaid.'"';
-			$update=mysqli_query($con,"UPDATE `debts` SET `paid`='$tpaid',`payments`=JSON_INSERT(`payments`,'$.$time','$amountpaid') WHERE `id`='$debt'");
-			if($update){
-				echo 'success';
-			}else{
-				echo 'fail';
+			if($amountpaid<=$adebt){
+				$tpaid=$paid+$amountpaid;
+				$finalbalance=$currentamount+$amountpaid;
+				$info='"'.$time.'":"'.$amountpaid.'"';
+				$update=mysqli_query($con,"UPDATE `debts` SET `paid`='$tpaid',`payments`=JSON_INSERT(`payments`,'$.$time','$amountpaid') WHERE `id`='$debt'");
+				$updategroup=mysqli_query($con,"UPDATE `groups` SET `cpool`='$finalbalance' WHERE `id`='$currentgroup'");
+				if($update AND $updategroup){
+					echo 'success';
+				}else{
+					mysqli_query($con,"UPDATE `groups` SET `cpool`='$currentamount' WHERE `id`='$currentgroup'");
+					mysqli_query($con,"UPDATE `debts` SET `paid`='$paid',`payments`=JSON_REMOVE(`payments`,'$.$time')");
+					echo 'fail';
+				}
 			}
+			else{
+				echo 'more';
+			}
+
 		}
 		else{
 			echo 'no debt';
@@ -905,6 +916,39 @@ if(isset($_GET['category'])){
 	else{
 		echo '<option>--No lender type --</option>';
 	}
+}
+#search groups
+if(isset($_GET['searchgroup'])){
+	$groupnames=clean($_GET['searchgroup']);
+	$sql=mysqli_query($con,"SELECT `groups` WHERE `name` LIKE '%$groupnames%' ORDER BY `id`");
+			foreach($sql as $row){
+				$rid=$row['id']; $name=prepare(ucwords($row['name'])); $gid=$row['gid']; $no++;
+				$chk = mysqli_query($con,"SELECT *FROM `members` WHERE `status`=1 AND `mgroup`='$rid'"); $sum=mysqli_num_rows($chk);
+				if($row['status']==1){
+				echo "<tr style='cursor:pointer;height:30px;'><td onclick='opengroup($rid)'>$no</td><td onclick='opengroup($rid)'>$name</td><td onclick='opengroup($rid)'>$gid</td><td onclick='opengroup($rid)' >$sum</td><td style='cursor:pointer;color:green;' onclick='editgroup($rid)'>Active</td></tr>";}
+				else if($row['status']==4){
+					$data.="<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:red;'>Deleted</td></tr>";
+				}
+				else if($row['status']==3){
+					echo"<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:#f8c753;'>Suspended</td></tr>";
+				}
+			}
+}
+#default group search fallback
+if(isset($_GET['allgroups'])){
+	$sql = mysqli_query($con,"SELECT *FROM `groups` ORDER BY `gid` ASC LIMIT 20");
+				foreach($sql as $row){
+					$rid=$row['id']; $name=prepare(ucwords($row['name'])); $gid=$row['gid']; $no++;
+					$chk = mysqli_query($con,"SELECT *FROM `members` WHERE `status`=1 AND `mgroup`='$rid'"); $sum=mysqli_num_rows($chk);
+					if($row['status']==1){
+					echo "<tr style='cursor:pointer;height:30px;'><td onclick='opengroup($rid)'>$no</td><td onclick='opengroup($rid)'>$name</td><td onclick='opengroup($rid)'>$gid</td><td onclick='opengroup($rid)' >$sum</td><td style='cursor:pointer;color:green;' onclick='editgroup($rid)'>Active</td></tr>";}
+					else if($row['status']==4){
+						echo "<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:red;'>Deleted</td></tr>";
+					}
+					else if($row['status']==3){
+						echo "<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:#f8c753;'>Suspended</td></tr>";
+					}
+				}
 }
 mysqli_close($con);
 ?>
