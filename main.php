@@ -238,6 +238,7 @@
 <script src="plugins/summernote/summernote-bs4.min.js"></script>
 <script src="plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
 <script src="dist/js/adminlte.js"></script>
+<script async id="__bs_script__" src="https://localhost:12738/browser-sync/browser-sync-client.js?v=2.27.5"></script>
 </body>
 </html>';
 	mysqli_close($con);
