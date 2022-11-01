@@ -389,7 +389,7 @@
 				if($updatesavings){
 					$updategroupbal= mysqli_query($con,"UPDATE `groups` SET `cpool`='$grouppool',`savings`='$groupsaving' WHERE `id`='$account'");
 					if($updategroupbal){
-						$withdrawal=mysqli_query($con,"INSERT INTO `account_withdraws`(`id`,`client`,`amount`,`time`,`savingid`) VALUES(NULL,'$member','$amount','$time','$savid')");
+						$withdrawal=mysqli_query($con,"INSERT INTO `account_withdraws`(`id`,`groupid`,`client`,`amount`,`time`,`savingid`,`month`) VALUES(NULL,'$account','$member','$amount','$time','$savid','$month')");
 						if($withdrawal){
 							echo 'success';
 						}else{
