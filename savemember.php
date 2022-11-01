@@ -919,36 +919,42 @@ if(isset($_GET['category'])){
 }
 #search groups
 if(isset($_GET['searchgroup'])){
-	$groupnames=clean($_GET['searchgroup']);
-	$sql=mysqli_query($con,"SELECT `groups` WHERE `name` LIKE '%$groupnames%' ORDER BY `id`");
-			foreach($sql as $row){
-				$rid=$row['id']; $name=prepare(ucwords($row['name'])); $gid=$row['gid']; $no++;
-				$chk = mysqli_query($con,"SELECT *FROM `members` WHERE `status`=1 AND `mgroup`='$rid'"); $sum=mysqli_num_rows($chk);
-				if($row['status']==1){
-				echo "<tr style='cursor:pointer;height:30px;'><td onclick='opengroup($rid)'>$no</td><td onclick='opengroup($rid)'>$name</td><td onclick='opengroup($rid)'>$gid</td><td onclick='opengroup($rid)' >$sum</td><td style='cursor:pointer;color:green;' onclick='editgroup($rid)'>Active</td></tr>";}
-				else if($row['status']==4){
-					$data.="<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:red;'>Deleted</td></tr>";
-				}
-				else if($row['status']==3){
-					echo"<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:#f8c753;'>Suspended</td></tr>";
-				}
+	$groupnames=strtolower(clean($_GET['searchgroup']));
+	$sql=mysqli_query($con,"SELECT * FROM `groups` WHERE `name` LIKE '%$groupnames%' ORDER BY `id`");
+	if(mysqli_num_rows($sql)>0){
+		$no=0;
+		foreach($sql as $row){
+			$rid=$row['id']; $name=prepare(ucwords($row['name'])); $gid=$row['gid']; $no++;
+			$chk = mysqli_query($con,"SELECT *FROM `members` WHERE `status`=1 AND `mgroup`='$rid'"); $sum=mysqli_num_rows($chk);
+			if($row['status']==1){
+			echo "<tr style='cursor:pointer;height:30px;'><td onclick='opengroup($rid)'>$no</td><td onclick='opengroup($rid)'>$name</td><td onclick='opengroup($rid)'>$gid</td><td onclick='opengroup($rid)' >$sum</td><td style='cursor:pointer;color:green;' onclick='editgroup($rid)'>Active</td></tr>";}
+			else if($row['status']==4){
+				$data.="<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:red;'>Deleted</td></tr>";
 			}
+			else if($row['status']==3){
+				echo"<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:#f8c753;'>Suspended</td></tr>";
+			}
+		}
+	}
+	else{
+		echo '<tr><td colspan="5" style="text-align:center;">Sorry, No match was found!</td></tr>';
+	}
 }
 #default group search fallback
 if(isset($_GET['allgroups'])){
-	$sql = mysqli_query($con,"SELECT *FROM `groups` ORDER BY `gid` ASC LIMIT 20");
-				foreach($sql as $row){
-					$rid=$row['id']; $name=prepare(ucwords($row['name'])); $gid=$row['gid']; $no++;
-					$chk = mysqli_query($con,"SELECT *FROM `members` WHERE `status`=1 AND `mgroup`='$rid'"); $sum=mysqli_num_rows($chk);
-					if($row['status']==1){
-					echo "<tr style='cursor:pointer;height:30px;'><td onclick='opengroup($rid)'>$no</td><td onclick='opengroup($rid)'>$name</td><td onclick='opengroup($rid)'>$gid</td><td onclick='opengroup($rid)' >$sum</td><td style='cursor:pointer;color:green;' onclick='editgroup($rid)'>Active</td></tr>";}
-					else if($row['status']==4){
-						echo "<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:red;'>Deleted</td></tr>";
-					}
-					else if($row['status']==3){
-						echo "<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:#f8c753;'>Suspended</td></tr>";
-					}
-				}
+	$sql = mysqli_query($con,"SELECT * FROM `groups` ORDER BY `gid` ASC LIMIT 20");
+		foreach($sql as $row){
+			$rid=$row['id']; $name=prepare(ucwords($row['name'])); $gid=$row['gid']; $no++;
+			$chk = mysqli_query($con,"SELECT *FROM `members` WHERE `status`=1 AND `mgroup`='$rid'"); $sum=mysqli_num_rows($chk);
+			if($row['status']==1){
+			echo "<tr style='cursor:pointer;height:30px;'><td onclick='opengroup($rid)'>$no</td><td onclick='opengroup($rid)'>$name</td><td onclick='opengroup($rid)'>$gid</td><td onclick='opengroup($rid)' >$sum</td><td style='cursor:pointer;color:green;' onclick='editgroup($rid)'>Active</td></tr>";}
+			else if($row['status']==4){
+				echo "<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:red;'>Deleted</td></tr>";
+			}
+			else if($row['status']==3){
+				echo "<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:#f8c753;'>Suspended</td></tr>";
+			}
+		}
 }
 mysqli_close($con);
 ?>
