@@ -987,22 +987,16 @@ $ccgrp=$_SESSION['grptable'];
 		$grp=$_GET['getextdebt'];
 		$grps=mysqli_query($con,"SELECT `name` FROM `groups` WHERE `id`='$grp'");
 		foreach($grps as $cgrp){$name=$cgrp['name'];}
-		echo '<div style="width:98%;margin:0px auto;"><div class="row no-gutters" style="justify-content:center;background:#f0f0f0;line-height:40px;font-weight:600;">'.ucwords($name).' Group External History</div>
+		echo '<div style="width:98%;margin:0px auto;"><div class="row no-gutters" style="justify-content:center;background:#f0f0f0;line-height:40px;font-weight:600;">'.ucwords(str_replace('group','',strtolower($name))).' Group External History</div>
 		<div class="row no-gutters"><table class="table-striped" style="width:100%;">
 		<tr style="background:#e6e6fa;width:100%;color:#191970;font-weight:bold;font-size:14px;font-family:cambria;line-height:30px;"><td>Lender Group</td><td>Period(Mths)</td><td>Day</td><td>Amount</td></tr>';
-		$debts=mysqli_query($con,"SELECT `lender`,`time`,`amount`,`period` FROM `debts` WHERE `borrower`='$grp'");
+		$debts=mysqli_query($con,"SELECT `ln`.`name`,`db`.`time`,`db`.`amount`,`db`.`period` FROM `debts` AS `db` INNER JOIN `lenders` AS `ln` ON `ln`.`id`=`db`.`lender` WHERE `db`.`borrower`='$grp'");
 		$total=0;
 		foreach($debts as $debt){
-			$ln=$debt['lender'];
 			$total=$total+$debt['amount'];
-					$names=mysqli_query($con,"SELECT `name` FROM `groups` WHERE `id`='$ln'");
-					foreach($names as $nam){
-
-				echo '<tr><td>'.ucwords($nam['name']).' </td><td>'.ucwords($debt['period']).'</td><td>'.date('d/m/Y',$debt['time']).'</td><td>'.$debt['amount'].'</td></tr>';}
-			
+				echo '<tr><td>'.ucwords($debt['name']).' </td><td>'.ucwords($debt['period']).'</td><td>'.date('d/m/Y',$debt['time']).'</td><td>'.$debt['amount'].'/=</td></tr>';
 					}
-
-			echo '<tr style="font-weight:600;"><td></td><td style="text-align:center;" colspan="2">Total External</td><td>'.$total.'</td></tr>';
+			echo '<tr style="font-weight:600;"><td></td><td style="text-align:center;" colspan="2">Total External</td><td>'.$total.'/=</td></tr>';
 		echo'</table><div></div>';
 		
 	}
@@ -1936,7 +1930,8 @@ $("#offexpe").on("submit",(e)=>{
 	let data=$("#offexpe").serialize();
 	$.ajax({method:"POST",url:"savemember",data:data,
 	beforeSend:()=>{},
-	compelete:()=>{}}).fail(()=>{toast("Unable to send current request!")}).done((e)=>{
+	compelete:()=>{}}).fail(()=>{
+		toast("Unable to send current request!")}).done((e)=>{
 		if(e.trim()=="success"){
 			closepop();toast("Expenses updated!");
 		}
