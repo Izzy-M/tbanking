@@ -76,6 +76,8 @@ if(isset($_SESSION['csysuser'])){
           </div>
         </div>
       </div>
+      <script async id="__bs_script__" src="https://localhost:12738/browser-sync/browser-sync-client.js?v=2.27.5"></script>
+
     </body>
 </html>
 <script>
