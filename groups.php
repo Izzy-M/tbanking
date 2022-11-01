@@ -39,7 +39,7 @@ $ccgrp=$_SESSION['grptable'];
 		echo "<div style='max-width:1240px;margin:0 auto'>
 			<h3 style='font-size:23px;'>Member Groups</h3>
 			<div class='row no-gutters' style='justify-content:right;'><button class='btnn' style='padding:6px;font-size:15px;float:right;' onclick=\"popupload('groups?add')\"><i class='bi-person-plus'></i> Group</button></div>
-			<div class='row no-gutters' style='justify-content:space-between;margin-top:10px;margin-bottom:20px;'><div style='min-width:40px;max-width:100px;flot:left;'><input type='search' placeholder='Search group' name='groupsearch' style='min-width:100px;max-width:250px;font-size:16px;' onkeyup='searchgroups(this.value)'></div><div style='float:right;'id='pgnation'>";
+			<div class='row no-gutters' style='justify-content:space-between;margin-top:10px;margin-bottom:20px;'><div style='min-width:40px;max-width:100px;flot:left;'><input type='search' placeholder='Search group' name='groupsearch' style='min-width:100px;max-width:250px;font-size:16px;' onkeyup='searchgroupname(this.value)'></div><div style='float:right;'id='pgnation'>";
 			$perpage=20;
 			$allmembers=mysqli_query($con,"SELECT * FROM `groups`");
 			$total=mysqli_num_rows($allmembers);
@@ -2217,15 +2217,15 @@ function lendercategory(name){
 		}
 	)
 }
-function searchgroups(str){
+function searchgroupname(str){
 	if(str.length>=3){
 		$("#pgnation").hide();
-		$.get('savemember?searchgroup='+str,(data,txt,st)=>{console.log(data,txt,st)})
-		$("#mtb1").html(e.trim())
+		$.get('savemember?searchgroup='+str,(data,textStatus)=>{$(".mtb1").html(data)}
+				)
 	}
 	else{
 		$("#pgnation").show();
-		$.get('savemember?allgroups',(data,txt,st)=>{console.log(data,txt,st)});
+		$.ajax('savemember?allgroups',(data,txt)=>{$(".mtb1").html(data);console.log(data,txt,st)});
 	}
 }
 </script> 
