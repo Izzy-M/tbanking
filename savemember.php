@@ -364,7 +364,7 @@
 			echo 'fail';
 		}
 	}
-#witdraw funds
+#withdraw funds
 	if(isset($_POST['groupaccount'])){
 		$account=$_POST['groupaccount'];
 		$amount=clean($_POST['wamaount']);
@@ -455,13 +455,14 @@
 #update member detaild
 	if(isset($_POST['updatee'])){
 		$member=$_POST['updatee'];
-		$username=$_POST['username'];
-		$idnum=$_POST['idnum'];
-		$phone=$_POST['phone'];
+		$username=clean($_POST['username']);
+		$idnum=clean($_POST['idnum']);
+		$phone=clean($_POST['phone']);
+		$pos-clean($_POST['grouppos']);
 		$res=clean($_POST['residence']);
 		$kin=rtrim($_POST['kin'],",");
 		$nxt='{"'.$kin.'}';
-		$update=mysqli_query($con,"UPDATE `members` SET `name`='$username',`idno`='$idnum',`phone`='$phone',`nextkin`='$nxt',`residence`='$res' WHERE id='$member'");
+		$update=mysqli_query($con,"UPDATE `members` SET `name`='$username',`idno`='$idnum',`phone`='$phone',`nextkin`='$nxt',`residence`='$res', `pos`='$pos' WHERE id='$member'");
 		if($update){
 			echo "success";
 		}else{
