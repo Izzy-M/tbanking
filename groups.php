@@ -115,7 +115,6 @@ $ccgrp=$_SESSION['grptable'];
 			}
 		echo '<div class="table-responsive style="margin-top:-15px;max-width:1200px;height:40px;"><div class="operations" style="margin-bottom:10px;overflow-x:auto;flex-wrap:nowrap;display:flex;flex-direction:row;overflow-x:auto;overflow-y:unset;min-width:875px;scrollbar-width:none;-ms-overflow-style:none;font-size:16px;">';
 		if(isset($ccgrp)){
-
 			echo '<div class="btnn1" onclick="getgroupops('.$ccgrp.')">Members</div>
 			<div class="btnn1" onclick="groupcharges('.$ccgrp.')">Fines and Charges</div>
 			<!--<div class="btnn1" onclick="investmoney('.$ccgrp.')">Deposit</div>-->
@@ -190,7 +189,7 @@ $ccgrp=$_SESSION['grptable'];
 				}
 			}
 			$cashin=$cashin+$fee;
-			echo '<tr style="font-weight:600;background:white;border-top:2px solid;border-bottom:1px solid;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;margin-left:10px;">'.$fee.'/=</td></tr></table><div class="row no-gutters" style="justify-content:center;font-weight:600;">Group Savings</div><table style="width:100%;min-width:200px;max-width:900px;"><tr><th>MNo</th><th>Type</th><th>Amount</th></tr>';
+			echo '<tr style="font-weight:600;background:white;border-top:2px solid;border-bottom:1px solid;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;margin-left:10px;">'.$fee.'/=</td></tr></table><div class="row no-gutters" style="justify-content:center;font-weight:600;">Group Savings</div><table style="width:100%;min-width:200px;max-width:900px;"><tr><th>Name</th><th>Type</th><th>Amount</th></tr>';
 			$savs=mysqli_query($con,"SELECT saving,`mb`.`name`,`dep`.`type` FROM `savings` AS `sav` INNER JOIN `members` AS `mb` ON `mb`.`id`=`sav`.`client` INNER JOIN `deposittypes` AS `dep` ON `sav`.`type`=`dep`.`id` WHERE `mgroup`='$ccgrp' GROUP BY `dep`.`type`");
 			$savn=0;
 			if(mysqli_num_rows($savs)>0){
@@ -211,14 +210,14 @@ $ccgrp=$_SESSION['grptable'];
 			echo '<tr style="border-top:2px solid;border-bottom:1px solid;font-weight:600;background:white;"><td style="text-align:center;">Subtotal</td><td style="text-align:end;" >'.$amount.'/=</td></tr></table>
 			</div>
 			</td><td style="display:flex;flex-direction:column;padding:0 5px">
-			<div class="row no-gutters" style="justify-content:center;font-weight:600">Loans Borrowed</div><table style="min-width:200px;max-width:900px"><tr><th>MNO</th><th>loan</th><th>Amount</th><tr>';
+			<div class="row no-gutters" style="justify-content:center;font-weight:600">Loans Borrowed</div><table style="min-width:200px;max-width:900px"><tr><th>Name</th><th>loan</th><th>Amount</th><tr>';
 			$cashout=0;
-			$repayment=mysqli_query($con,"SELECT `ln`.`phistory`,`ln`.`amount`,`lty`.`name`,`mb`.`sysnum` FROM `members` AS `mb` INNER JOIN `loans` AS `ln` ON `ln`.`client`=`mb`.`id` INNER JOIN `loantype` AS `lty` ON `ln`.`loantype`=`lty`.`id` WHERE `mb`.`mgroup`='$ccgrp' AND `ln`.`paid`>0");
+			$repayment=mysqli_query($con,"SELECT `ln`.`phistory`,`ln`.`amount`,`lty`.`name`,`mb`.`name` AS `mname` FROM `members` AS `mb` INNER JOIN `loans` AS `ln` ON `ln`.`client`=`mb`.`id` INNER JOIN `loantype` AS `lty` ON `ln`.`loantype`=`lty`.`id` WHERE `mb`.`mgroup`='$ccgrp' AND `ln`.`paid`>0");
 			$loans=0;
 				foreach($repayment as $repay){
 					foreach(json_decode($repay['phistory'],1) as $k=>$v){
 					if($k>=$first && $k<=$last){
-						echo '<tr><td>'.$repay['sysnum'].'</td><td>'.$repay['name'].'</td><td style="width:80px;">'.$repay['amount'].'</td></tr>';
+						echo '<tr><td>'.$repay['mname'].'</td><td>'.$repay['name'].'</td><td style="width:80px;">'.$repay['amount'].'</td></tr>';
 					$loans=$loans+$v;}
 					}
 
@@ -255,12 +254,12 @@ $ccgrp=$_SESSION['grptable'];
 				}
 				$cashout=$cashout+$ofexp;
 			echo '<tr style="border-top:2px solid;border-bottom:1px solid;font-weight:600;background:white;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;margin-left:10px;">'.$ofexp.'/=</td></tr></table>
-			<div class="row no-gutters" style="justify-content:center;font-weight:600;">Member Withdraws</div><table class="table-stripped"><tr><th>MNo</th><th>Date</th><th style="width:80px;">Amount</th></tr>';
-			$withdraws=mysqli_query($con,"SELECT `as`.`amount`,`mb`.`sysnum`,`as`.`time` FROM `account_withdraws` AS `as` INNER JOIN `members` AS `mb` ON `mb`.`id`=`as`.`client` WHERE `mb`.`mgroup`='$ccgrp' AND `as`.`time`>='$first'");
+			<div class="row no-gutters" style="justify-content:center;font-weight:600;">Member Withdraws</div><table class="table-stripped"><tr><th>Name</th><th>Date</th><th style="width:80px;">Amount</th></tr>';
+			$withdraws=mysqli_query($con,"SELECT `as`.`amount`,`mb`.`name`,`as`.`time` FROM `account_withdraws` AS `as` INNER JOIN `members` AS `mb` ON `mb`.`id`=`as`.`client` WHERE `mb`.`mgroup`='$ccgrp' AND `as`.`time`>='$first'");
 			$amt=0;
 			foreach($withdraws as $withd){
 				$amt=$amt+$withd['amount'];
-				echo '<tr><td>'.$withd['sysnum'].'</td><td>'.date('d/m/Y',$withd['time']).'</td><td style="width:80px;">'.$withd['amount'].'/=</td></tr>';
+				echo '<tr><td>'.$withd['name'].'</td><td>'.date('d/m/Y',$withd['time']).'</td><td style="width:80px;">'.$withd['amount'].'/=</td></tr>';
 			}
 			$cashout=$cashout+$amt;
 			echo '<tr style="border-top:2px solid;border-bottom:1px solid;font-weight:600;background:white;">
@@ -350,8 +349,9 @@ $ccgrp=$_SESSION['grptable'];
 	#fetch all members
 	if(isset($_GET['groupopts'])){
 		$grp=$_GET['groupopts'];
-		echo '</div><div class="row no-gutters" style="display:flex;flex-direction:row;flex-wrap:nowrap;">';
-		$allmembers=mysqli_query($con,"SELECT `mb`.*,`gp`.`position` FROM `members` AS `mb` INNER JOIN `grouppositions` AS `gp` ON `mb`.`pos`=`gp`.`id` WHERE `mb`.`mgroup`='$grp' AND `mb`.`status`=1");
+		echo '</div><div class="row no-gutters" style="justify-content:right;margin:0 20px;"><button class="btnn" style="float:right;" onclick="newgroupmember()"><i class="bi-person-plus"></i> Add Member</button></div><div class="row no-gutters" style="display:flex;flex-direction:row;flex-wrap:nowrap;">
+		';
+		$allmembers=mysqli_query($con,"SELECT `mb`.*,`gp`.`position` FROM `members` AS `mb` INNER JOIN `grouppositions` AS `gp` ON `mb`.`pos`=`gp`.`id` WHERE `mb`.`mgroup`='$ccgrp' AND `mb`.`status`=1");
 			if(mysqli_num_rows($allmembers)>0){
 		echo '<table class="table-striped" style="width:100%;min-width:530px;margin:0px auto;" id="cgrouptable">
 		<tr style="background:#e6e6fa;color:#191970;font-weight:bold;font-size:14px;font-family:cambria;line-height:30px;">
@@ -377,7 +377,7 @@ $ccgrp=$_SESSION['grptable'];
 	  echo '<tr style="background:#ffffff;line-height:30px;"><th colspan="4" style="padding:0px 20px;"><div class="row no-gutters"><div></th></tr></table></div></div></div>';
 		}
 		else{
-		echo '<div class="row no-gutters" style="height:auto;border:none;width:95%;margin-top:10%;align-items:center;justify-content:center;color:#ff8800;">Oops! It seems like there is no member who has been registerd in this group!</div>';
+		echo '<div class="row no-gutters" style="height:auto;border:none;width:95%;margin-top:2%;align-items:left;justify-content:left;color:#ff8800;">Oops! It seems like there is no member who has been registerd in this group!</div>';
 		}
 	
 	}
@@ -952,6 +952,20 @@ $ccgrp=$_SESSION['grptable'];
 		<p><div class="row no-gutters">ID Number</div>
 		<div class="row no-gutters"><input style="width:100%;max-width:300px;" name="idnum" type="number" 
 		value="'.$m['idno'].'"></div></p>
+		<p><div class="row no-gutters">Group Role</div>
+		<div class="row no-gutters"><select style="width:100%;max-width:300px;" name="grouppos">';
+			$positions=mysqli_query($con,"SELECT * FROM `grouppositions`");
+			if(mysqli_num_rows($positions)>0){
+				foreach($positions as $position){
+					$select=$position['id']==$m['pos']? 'selected':'';
+				echo '<option value="'.$position['id'].'" '.$select.'>'.ucwords($position['position']).'</option>';
+				}
+			}
+			else{
+				echo '<option>-- No positions-- </option>';
+			}
+		
+		echo '</select></div></p>
 		<p><div class="row no-gutters">Contact</div>
 		<div class="row no-gutters"><input style="width:100%;max-width:300px;" type="number" name="phone" 
 		value="'.$m['phone'].'"></div></p>
@@ -1297,19 +1311,19 @@ $ccgrp=$_SESSION['grptable'];
 			<table class="table-striped" style="width:100%;font-size:12px;">
 			<tr><td><h5>Cash In</h5></td><td><h5>Cash Out</h5></td></tr><tr><td style="width:50%;padding:0 5px;vertical-align:top;">
 			<div class="row no-gutters" style="justify-content:center;font-weight:600;">Fines and Charges</div>
-			<table style="width:100%;max-width:900px;min-width:200px;"><tr><th>MNO</th><th>type</th><th>Amount</th></tr>';
+			<table style="width:100%;max-width:900px;min-width:200px;"><tr><th>Name</th><th>type</th><th>Amount</th></tr>';
 			
-				$fines=mysqli_query($con,"SELECT `fin`.`amount`,`chty`.`name`,`memb`.`sysnum` FROM `fines` AS `fin` INNER JOIN `members` AS `memb` ON `fin`.`client`=`memb`.`id` INNER JOIN `chargetypes` AS `chty` ON `fin`.`charges`=`chty`.`id` WHERE `memb`.`mgroup`='$grp' AND `fin`.`date`>='$first'");
+				$fines=mysqli_query($con,"SELECT `fin`.`amount`,`chty`.`name`,`memb`.`name` AS `mname` FROM `fines` AS `fin` INNER JOIN `members` AS `memb` ON `fin`.`client`=`memb`.`id` INNER JOIN `chargetypes` AS `chty` ON `fin`.`charges`=`chty`.`id` WHERE `memb`.`mgroup`='$grp' AND `fin`.`date`>='$first'");
 				$totalfines=0;
 				foreach($fines as $fine){
-					echo '<tr><td>'.$fine['sysnum'].'</td><td>'.$fine['name'].'</td><td style="width:80px;">'.$fine['amount'].'</td></tr>';
+					echo '<tr><td>'.$fine['mname'].'</td><td>'.$fine['name'].'</td><td style="width:80px;">'.$fine['amount'].'</td></tr>';
 						$totalfines=$totalfines+$fine['amount'];
 					
 					}
 				$cashin=$cashin+$totalfines;
 			echo '<tr style="border-top:2px solid;border-bottom:1px solid;font-weight:600;background:white;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;margin-left:10px;">'.$totalfines.'/= </td></tr></table><br>
 			<div class="row no-gutters" style="justify-content:center;font-weight:600;">Loan Repayment</div>
-			<table style="width:100%;max-width:900px;min-width:200px;"><tr><th>MNo</th><th>Loan</th><th>Amount</th></tr>';
+			<table style="width:100%;max-width:900px;min-width:200px;"><tr><th>Name</th><th>Loan</th><th>Amount</th></tr>';
 			$repayment=mysqli_query($con,"SELECT `sysnum`,`paid`,`appfee`,`phistory`,`loan`,`overdue` FROM `members` AS `mb` INNER JOIN `loans` AS `ln` ON `mb`.`id`=`ln`.`client` WHERE `mgroup`='$grp' AND `paid`>0")
 			;$loans=0;$app=0;
 			foreach($repayment as $repay){
@@ -1333,24 +1347,24 @@ $ccgrp=$_SESSION['grptable'];
 			
 			<div class="row no-gutters" style="font-weight:600;justify-content:center;font-weight:600;">Loan application fee</div>
 			<table style="width:100%;max-width:900px;min-width:200px">';
-			$repayment=mysqli_query($con,"SELECT `ap`.`history`,`sysnum`,`ap`.`loan`FROM `groups` AS `gr` INNER JOIN `members` AS `m` ON `m`.`mgroup`=`gr`.`id` INNER JOIN `applicationfee` AS `ap` ON `ap`.`client`=`m`.`id` WHERE `gr`.`id`='2'");
+			$repayment=mysqli_query($con,"SELECT `ap`.`history`,`name`,`ap`.`loan`FROM `groups` AS `gr` INNER JOIN `members` AS `m` ON `m`.`mgroup`=`gr`.`id` INNER JOIN `applicationfee` AS `ap` ON `ap`.`client`=`m`.`id` WHERE `gr`.`id`='2'");
 			$fee=0;
 			foreach($repayment as $repay){
 				foreach(json_decode($repay['history'],1) as $k=>$v){
 				if($k>=$first){
 				$fee=$fee+$v;
-					echo '<tr><td>'.$repay['sysnum'].'</td><td>'.$repay['loan'].'</td><td style="width:80px;">'.($v).'</td></tr>';
+					echo '<tr><td>'.$repay['name'].'</td><td>'.$repay['loan'].'</td><td style="width:80px;">'.($v).'</td></tr>';
 					}
 				}
 			}
 			$cashin= $cashin+$fee;
-			echo '<tr style="font-weight:600;background:white;border-top:2px solid;border-bottom:1px solid;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;margin-left:10px;">'.$fee.'/=</td></tr></table><div class="row no-gutters" style="justify-content:center;font-weight:600;">Group Savings</div><table style="width:100%;min-width:200px;max-width:900px;"><tr><th>MNo</th><th>Type</th><th>Amount</th></tr>';
-			$savs=mysqli_query($con,"SELECT `saving`,`mb`.`sysnum`,`dep`.`type` FROM `savings` AS `sav` INNER JOIN `members` AS `mb` ON `mb`.`id`=`sav`.`client` INNER JOIN `deposittypes` AS `dep` ON `sav`.`type`=`dep`.`id` WHERE `mgroup`='$grp' AND `sav`.`time`>='$first'");
+			echo '<tr style="font-weight:600;background:white;border-top:2px solid;border-bottom:1px solid;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;margin-left:10px;">'.$fee.'/=</td></tr></table><div class="row no-gutters" style="justify-content:center;font-weight:600;">Group Savings</div><table style="width:100%;min-width:200px;max-width:900px;"><tr><th>Name</th><th>Type</th><th>Amount</th></tr>';
+			$savs=mysqli_query($con,"SELECT `saving`,`mb`.`name`,`dep`.`type` FROM `savings` AS `sav` INNER JOIN `members` AS `mb` ON `mb`.`id`=`sav`.`client` INNER JOIN `deposittypes` AS `dep` ON `sav`.`type`=`dep`.`id` WHERE `mgroup`='$grp' AND `sav`.`time`>='$first'");
 			$savn=0;
 			if(mysqli_num_rows($savs)>0){
 			foreach($savs as $sav){
 				$savn=$savn+$sav['saving'];
-				echo '<tr><td>'.$sav['sysnum'].'</td><td>'.$sav['type'].'</td><td style="width:80px;">'.$sav['saving'].'</td></tr>';}
+				echo '<tr><td>'.$sav['name'].'</td><td>'.$sav['type'].'</td><td style="width:80px;">'.$sav['saving'].'</td></tr>';}
 			}
 			$cashin= $cashin+$savn;
 			echo '<tr style="border-top:2px solid;border-bottom:1px solid;font-weight:600;background:white;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;">'.$savn.'/=</td></tr></table>';
@@ -1369,14 +1383,14 @@ $ccgrp=$_SESSION['grptable'];
 			echo '<tr style="border-top:2px solid;border-bottom:1px solid;font-weight:600;background:white;"><td style="text-align:center;">Subtotal</td><td style="text-align:end;" >'.$amount.'/=</td></tr></table>
 			</div>
 			</td><td style="display:flex;flex-direction:column;padding:0 5px">
-			<div class="row no-gutters" style="justify-content:center;font-weight:600">Loans Borrowed</div><table style="min-width:200px;max-width:900px"><tr><th>MNO</th><th>loan</th><th>Amount</th><tr>';
+			<div class="row no-gutters" style="justify-content:center;font-weight:600">Loans Borrowed</div><table style="min-width:200px;max-width:900px"><tr><th>Name</th><th>loan</th><th>Amount</th><tr>';
 			$cashout=0;
-			$repayment=mysqli_query($con,"SELECT `ln`.`phistory`,`ln`.`amount`,`lty`.`name`,`mb`.`sysnum` FROM `members` AS `mb` INNER JOIN `loans` AS `ln` ON `ln`.`client`=`mb`.`id` INNER JOIN `loantype` AS `lty` ON `ln`.`loantype`=`lty`.`id` WHERE `mb`.`mgroup`='$grp' AND `ln`.`paid`>0");
+			$repayment=mysqli_query($con,"SELECT `ln`.`phistory`,`ln`.`amount`,`lty`.`name`,`mb`.`name` AS `mname` FROM `members` AS `mb` INNER JOIN `loans` AS `ln` ON `ln`.`client`=`mb`.`id` INNER JOIN `loantype` AS `lty` ON `ln`.`loantype`=`lty`.`id` WHERE `mb`.`mgroup`='$grp' AND `ln`.`paid`>0");
 			$loans=0;
 				foreach($repayment as $repay){
 					foreach(json_decode($repay['phistory'],1) as $k=>$v){
 					if($k>=$first){
-						echo '<tr><td>'.$repay['sysnum'].'</td><td>'.$repay['name'].'</td><td style="width:80px;">'.$repay['amount'].'</td></tr>';
+						echo '<tr><td>'.$repay['mname'].'</td><td>'.$repay['name'].'</td><td style="width:80px;">'.$repay['amount'].'</td></tr>';
 					$loans=$loans+$v;}
 					}
 
@@ -1413,12 +1427,12 @@ $ccgrp=$_SESSION['grptable'];
 				}
 				$cashout=$cashout+$ofexp;
 			echo '<tr style="border-top:2px solid;border-bottom:1px solid;font-weight:600;background:white;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;margin-left:10px;">'.$ofexp.'/=</td></tr></table>
-			<div class="row no-gutters" style="justify-content:center;font-weight:600;">Member Withdraws</div><table class="table-stripped"><tr><th>MNo</th><th>Date</th><th style="width:80px;">Amount</th></tr>';
-			$withdraws=mysqli_query($con,"SELECT `as`.`amount`,`mb`.`sysnum`,`as`.`time` FROM `account_withdraws` AS `as` INNER JOIN `members` AS `mb` ON `mb`.`id`=`as`.`client` WHERE `mb`.`mgroup`='$grp' AND `as`.`time`>='$first'");
+			<div class="row no-gutters" style="justify-content:center;font-weight:600;">Member Withdraws</div><table class="table-stripped"><tr><th>Name</th><th>Date</th><th style="width:80px;">Amount</th></tr>';
+			$withdraws=mysqli_query($con,"SELECT `as`.`amount`,`mb`.`name`,`as`.`time` FROM `account_withdraws` AS `as` INNER JOIN `members` AS `mb` ON `mb`.`id`=`as`.`client` WHERE `mb`.`mgroup`='$grp' AND `as`.`time`>='$first'");
 			$amt=0;
 			foreach($withdraws as $withd){
 				$amt=$amt+$withd['amount'];
-				echo '<tr><td>'.$withd['sysnum'].'</td><td>'.date('d/m/Y',$withd['time']).'</td><td style="width:80px;">'.$withd['amount'].'/=</td></tr>';
+				echo '<tr><td>'.$withd['name'].'</td><td>'.date('d/m/Y',$withd['time']).'</td><td style="width:80px;">'.$withd['amount'].'/=</td></tr>';
 			}
 			$cashout=$cashout+$amt;
 			echo '<tr style="border-top:2px solid;border-bottom:1px solid;font-weight:600;background:white;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;margin-left:10px;">'.$amt.'/=</td></tr></table></td></tr><tr style="line-height:35px;background:white;font-size:16px;font-weight:600;"><td><div class="row no-gutters"><div class="col-8" style="text-align:right;">Total</div><div class="col-4" style="text-align:right;">'.$cashin.'/=</div></td><td><div class="row no-gutters"><div class="col-8" style="text-align:right;">Total</div><div class="col-4" style="text-align:right;">'.$cashout.'/=</div</td></tr></table></div></div></div>';
@@ -1504,7 +1518,7 @@ $ccgrp=$_SESSION['grptable'];
 			$cashin= $cashin+$savn;
 			echo '<tr style="border-top:2px solid;border-bottom:1px solid;font-weight:600;background:white;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;">'.$savn.'/=</td></tr></table>
 			</td><td style="display:flex;flex-direction:column;padding:0 5px">
-			<div class="row no-gutters" style="justify-content:center;font-weight:600">Loans Borrowed</div><table style="min-width:200px;max-width:900px"><tr><th>MNO</th><th>loan</th><th style="text-align:right;">Amount</th><tr>';
+			<div class="row no-gutters" style="justify-content:center;font-weight:600">Loans Borrowed</div><table style="min-width:200px;max-width:900px"><tr><th>Name</th><th>loan</th><th style="text-align:right;">Amount</th><tr>';
 			$cashout=0;
 			$repayment=mysqli_query($con,"SELECT `ln`.`phistory`,`ln`.`amount`,`lty`.`name`,`mb`.`sysnum` FROM `members` AS `mb` INNER JOIN `loans` AS `ln` ON `ln`.`client`=`mb`.`id` INNER JOIN `loantype` AS `lty` ON `ln`.`loantype`=`lty`.`id` WHERE `ln`.`client`='$cme' AND `ln`.`paid`>0");
 			$loans=0;
@@ -1530,14 +1544,7 @@ $ccgrp=$_SESSION['grptable'];
 	if(isset($_GET['nextgroup'])){
 		$cpage=$_GET['nextgroup'];$perpage=$_GET['limit'];$npage=$_GET['count'];$start=($cpage)*$perpage;
 		$final=($npage+1)*$perpage;$trs=""; $no=0;$start=($cpage)*$perpage;
-		
-		echo "<tr style='height:35px;background:white;'><td colspan='7' style='text-align:right;'><select onchange='nextgroup($npage,$perpage,this.value)'>";
-			for($i=0;$i<$npage;$i++){
-				$clr=$i==$cpage?"selected":'';
-				echo '<option '.$clr.' value="'.$i.'">'.($i+1).'</option>';
-			}
-			echo "</select></td></tr><tr style='background:#e6e6fa;color:#191970;font-weight:bold;font-size:14px;font-family:cambria;'><td>SN</td><td>Name</td><td>Group ID</td>
-				<td>Members</td><td>Status</td></tr>";
+	
 		$sql = mysqli_query($con,"SELECT *FROM `groups` ORDER BY `gid` ASC LIMIT $start,$perpage");
 		foreach($sql as $row){
 			$rid=$row['id']; $name=prepare(ucwords($row['name'])); $gid=$row['gid']; $no++;
@@ -1660,7 +1667,43 @@ $ccgrp=$_SESSION['grptable'];
 		<div class="row no-gutters" style="justify-content:end;margin-top:10px;"><button class="btn btn-success">Complete</div><br>
 		</form></div>';
 	}
-	
+	if(isset($_GET['groupmembernew'])){
+		echo "<div style='max-width:320px;margin:0 auto;'>
+		<h3 style='text-align:center;color:#191970;font-size:23px;margin:0px'>Add New Member</h3><br>
+		<form method='post' id='mform' onsubmit=\"savemember(event)\">
+			<p>Full name<br><input type='text' name='name' style='width:100%' required></p>
+			<p>Phone number<br><input type='number' name='fon' style='width:100%' required></p>
+			<p>ID Number<br><input type='number' style='width:100%' name='idno' required></p>
+			<p>Member Number<br><input type='text' style='width:100%' name='memberno' required></p>
+			<p><div class='row'><div class='col-6'>Date of Birth <br> <input type='date' style='width:100%;max-width:140px;' name='dob' max='".date('Y-m-d')."' required></div>
+			<div class='col-5'>Member Group<br><select style='width:100%;max-width:120px;' name='grup'>";
+			$currentgroup=mysqli_query($con,"SELECT * FROM `groups` WHERE `id`='$ccgrp'");
+		foreach($currentgroup as $current){
+			$selected=$ccgrp==$current['id']?'selected':'';
+			echo '<option value='.$current['id'].' '.$selected.'>'.ucwords($current['name']).'</option>';
+		}
+			echo "</select></div></div></p>
+			<p style='margin-bottom:15px'>Photo<br><input type='file' name='pic' id='pic' style='width:100%;box-shadow:0px;border:0px' accept='image/*' required></p>
+			<p>Member Role<br><select name='mrole' style='width:100%;max-width:280px;' required>";
+			$roles=mysqli_query($con,"SELECT `id`,`position` FROM `grouppositions`");
+			if(mysqli_num_rows($roles)>0){
+				foreach($roles as $role){
+				echo '<option value='.$role['id'].'>'.$role['position'].'</option>';
+				}
+			}else{
+				echo '<option value="0">No available role</option>';}
+			echo "</select></p>
+			<p>Place of residence<br><input type='text' name='residence' style='width:100%' required></p>
+			<p>Next of Kin name<br><input type='text' name='kname' style='width:100%' required></p>
+			<p>Next of Kin Contact<br><input type='tel' name='kcont' style='width:100%' required></p>
+			<p>Share percentage<br><input type='number' name='share' style='width:100%' required></p>
+			<p><div class='row no-gutters' id='ttle' style='font-weight:bold;padding-left:20px;'></div></p>
+			<p><div id='kin'></div></p>
+			<div class='row no-gutters' style=padding-left:10px;'><i class='bi bi-plus-circle-fill' style='font-size:26px;color:green;' onclick='addkin()';></i></div>
+			<p style='text-align:right'><button class='btnn'>Save</button></p><br>
+		</form><br>
+	</div>";
+	}
 	mysqli_close($con);
 ?>
 
@@ -2014,6 +2057,10 @@ function deletemember(id,grp){
 		}
 	})
 }
+function managegroup(grp){
+	moredismiss()
+	$(".grpview").load("groups?managemembers="+grp)
+}
 function withdraw(grp){
 	moredismiss()
 	popupload("groups?withdrawal="+grp)
@@ -2222,5 +2269,8 @@ function searchgroupname(str){
 		$("#pgnation").show();
 		$.ajax('savemember?allgroups',(data,txt)=>{$(".mtb1").html(data);console.log(data,txt,st)});
 	}
+}
+function newgroupmember(){
+	popupload('groups?groupmembernew');
 }
 </script> 
