@@ -521,7 +521,7 @@ if(isset($_GET['unpaidbills'])){
             foreach($getbills as $bill){
                 $d=strtotime($bill['ddate'])-strtotime("today");
                 $res=$d/(24*60*60);
-                $stat=$res>=0?"<span style=''> Due in ".$res." day(s)</span>":"<span style='color:red;'> ".abs($res). " days ago</span>";
+                $stat=$res=0?"<span style=''> Due in ".(int)$res." day(s)</span>":"<span style='color:red;'> ".(int)abs($res). " days ago</span>";
             echo '<tr style=""><td>'.ucwords($bill['name']).'</td><td>'.ucwords($bill['item']).'</td><td>'.$bill['qty'].'</td><td>'.$bill['balance'].'</td><td>'.$bill['ddate'].'</td><td>'. $stat.'</td></tr>';}
         }
         else{
