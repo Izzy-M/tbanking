@@ -952,6 +952,9 @@ $ccgrp=$_SESSION['grptable'];
 		<p><div class="row no-gutters">ID Number</div>
 		<div class="row no-gutters"><input style="width:100%;max-width:300px;" name="idnum" type="number" 
 		value="'.$m['idno'].'"></div></p>
+		<p><div class="row no-gutters">Member Number</div>
+		<div class="row no-gutters"><input style="width:100%;max-width:300px;" name="sysnumber" min="0" type="number" 
+		value="'.$m['sysnum'].'"></div></p>
 		<p><div class="row no-gutters">Group Role</div>
 		<div class="row no-gutters"><select style="width:100%;max-width:300px;" name="grouppos">';
 			$positions=mysqli_query($con,"SELECT * FROM `grouppositions`");

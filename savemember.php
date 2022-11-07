@@ -85,7 +85,7 @@
 			echo "fail".mysqli_error($con).$sname.','.$seld.','.$int.','.$period.','.$overduerate;
 			}
 		}
-	# save loan
+# save loan
 	if(isset($_POST['prod'])){
 		$prd = trim($_POST['prod']);
 		$mid = trim($_POST['mid']);
@@ -134,8 +134,8 @@
 		$ext = @strtolower(array_pop(explode(".",strtolower($_FILES['photo']['name']))));
 		$get = array("png","jpg","jpeg","gif");
 		
-		$chk1 = mysqli_query($con,"SELECT *FROM `members` WHERE `phone`='$fon'");
-		$chk2 = mysqli_query($con,"SELECT *FROM `members` WHERE `idno`='$idno'");
+		$chk1 = mysqli_query($con,"SELECT *FROM `members` WHERE `phone`='$fon' AND `mgroup`='$grp'");
+		$chk2 = mysqli_query($con,"SELECT *FROM `members` WHERE `idno`='$idno' AND `mgroup`='$grp'");
 		$chk3=mysqli_query($con,"SELECT `id` FROM `members` ORDER BY `id` DESC LIMIT 1");
 		foreach($chk3 as $chk){
 			$ncode=$chk['id']+1;
@@ -157,7 +157,7 @@
 			if(move_uploaded_file($tmp,$img)){
 				if(cropSQ($img,200,$img)){
 					$pic = base64_encode(file_get_contents($img));
-					if(mysqli_query($con,"INSERT INTO `members`(`id`,`uid`,`name`,`phone`,`idno`,`photo`,`dob`,`mgroup`,`time`,`nextkin`,`sysnum`,`residence`) VALUES(NULL,'$uid','$cname','$fon','$idno','$pic','$dob','$mgrp','$tym','$kinsdata','$mno','$res')")){
+					if(mysqli_query($con,"INSERT INTO `members`(`id`,`uid`,`name`,`phone`,`idno`,`photo`,`dob`,`mgroup`,`time`,`nextkin`,`membernumber`,`residence`) VALUES(NULL,'$uid','$cname','$fon','$idno','$pic','$dob','$mgrp','$tym','$kinsdata','$mno','$res')")){
 						unlink($img);
 						echo "success";
 					}
@@ -434,7 +434,6 @@
 			if($deletemember){
 				echo 'success';
 			}else{
-				echo mysqli_error($con);
 				echo 'fail';
 			}
 		}
@@ -458,11 +457,12 @@
 		$username=clean($_POST['username']);
 		$idnum=clean($_POST['idnum']);
 		$phone=clean($_POST['phone']);
+		$num=clean($_POST['sysnumber']);
 		$pos-clean($_POST['grouppos']);
 		$res=clean($_POST['residence']);
 		$kin=rtrim($_POST['kin'],",");
 		$nxt='{"'.$kin.'}';
-		$update=mysqli_query($con,"UPDATE `members` SET `name`='$username',`idno`='$idnum',`phone`='$phone',`nextkin`='$nxt',`residence`='$res', `pos`='$pos' WHERE id='$member'");
+		$update=mysqli_query($con,"UPDATE `members` SET `name`='$username',`idno`='$idnum',`phone`='$phone',`nextkin`='$nxt',`residence`='$res', `pos`='$pos', `membernumber`='$num' WHERE id='$member'");
 		if($update){
 			echo "success";
 		}else{
@@ -549,7 +549,7 @@
 #search member from 
 	if(isset($_POST['sqterm'])){
 		$term=clean($_POST['sqterm']);
-		$getall=mysqli_query($con,"SELECT * FROM `members` WHERE `name` LIKE '%$term%' OR `idno` LIKE'%$term%' OR `phone` LIKE '%$term%' OR `sysnum` LIKE '%$term%'");
+		$getall=mysqli_query($con,"SELECT * FROM `members` WHERE `name` LIKE '%$term%' OR `idno` LIKE'%$term%' OR `phone` LIKE '%$term%' OR `membernumber` LIKE '%$term%'");
 		if(mysqli_num_rows($getall)>0){
 		foreach($getall as $row){
 			$mid=$row['id']; $name=ucwords(prepare($row['name'])); $uid=$row['uid']; $fon=$row['phone']; $idno=$row['idno']; $pic=strlen($row['photo'])>1?'data:image/jpg;base64,'.$row['photo']:'assets/img/user.png';
@@ -641,7 +641,7 @@
 			<tr><td style="font-weight:500;">Contact</td>
 			</td><td>0'.$m['phone'].'</td></tr>
 			<tr><td style="font-weight:500;">Member No</td>
-			</td><td>'.$m['sysnum'].'</td></tr><tr><td style="font-weight:500;">DOB</td>
+			</td><td>'.$m['membernumber'].'</td></tr><tr><td style="font-weight:500;">DOB</td>
 			</td><td>'.$m['dob'].'</td></tr></p>';
 				if(strlen($m['nextkin'])>2){
 					echo '<tr style="background:#f2f6fc;color:#191970;font-weight:bold;font-size:14px;font-family:cambria;line-height:30px;margin-top:5px;"><td colspan="2">Next of Kin details</td></tr>';

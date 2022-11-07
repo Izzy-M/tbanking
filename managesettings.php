@@ -2,7 +2,7 @@
 require 'functions.php';
 require 'comp/vendor/autoload.php';
 $con=mysqli_connect(HOST,DB_USER,DB_PASS,DB_NAME);
-//addpodition
+//add position
 if(isset($_POST['emppos'])){
     $position=clean($_POST['emppos']);
     $select=mysqli_query($con,"SELECT * FROM `employee_positions` WHERE `name`='$position'");
@@ -18,7 +18,7 @@ if(isset($_POST['emppos'])){
         }
     }
 }
-//all employees
+//get all employees
 if(isset($_GET['employees'])){
     echo '<div class="col-8 mx-auto" style="width:100%;max-width:600px;"><div class="row no-gutters" style="justify-content:center;"><h4>Delete Employee<h4></div><table class="table-striped" style="width:100%;">
     <tr style="background:#e6e6fa;width:100%;color:#191970;font-weight:bold;font-size:14px;font-family:cambria;line-height:30px;"><td>Employee name</td><td>Position</td><td>Delete</td></tr>';
@@ -39,7 +39,7 @@ if(isset($_GET['employees'])){
     
     echo '</table></div>';
 }
-//all loans
+//get all loans
 if(isset($_GET['allloans'])){
     echo '<div class="col-11 mx-auto" style="max-width:1240px;">
     <div class="row no-gutters" style="justify-content:center;text-align:center"><h4 style="">All Loans List</h4></div>
@@ -55,7 +55,7 @@ if(isset($_GET['allloans'])){
      }
     echo '</table></div></div></div>';}
 
-//getloans to edit
+//get loans to edit
 if(isset($_GET['getloans'])){
         echo '<div class="col-11 mx-auto" style="max-width:1240px;">
         <div class="row no-gutters" style="justify-content:center;text-align:center"><h4 style="">Active Loans List</h4></div>
@@ -96,7 +96,6 @@ if(isset($_POST['deactivategroup'])){
      }
 }
 #delete group
-
 if(isset($_POST['deletedgroup'])){
     $delgroup=$_POST['deletedgroup'];
     $deleteloan=mysqli_query($con,"UPDATE `groups` SET `status`=4 WHERE `id`='$delgroup'");
@@ -131,6 +130,7 @@ if(isset($_POST['loantp'])){
         echo 'fail'.mysqli_error($con);
     }
 }
+#upload excell file
 if(isset($_POST['sgroup'])){
     $group=$_POST['sgroup'];
     $group=(int)$group;
@@ -166,9 +166,10 @@ if(isset($_POST['sgroup'])){
                     $name=clean($row[1]);$residence=clean($row[5]);
                      if(strlen($row[3])>6 && mysqli_num_rows($membersid)<1){
                          $update=mysqli_query($con,"UPDATE `settings` SET `value`='$usid' WHERE `id`=2");
-                        $insert=mysqli_query($con,"INSERT INTO `members`(`id`,`name`,`uid`,`sysnum`,`phone`,`idno`,`residence`,`time`,`pos`,`mgroup`,`status`) VALUES(NULL,'$name','$usid','$row[2]','$row[3]','$row[4]','$residence','$time','$pos','$group',1)");
+                        $insert=mysqli_query($con,"INSERT INTO `members`(`id`,`name`,`uid`,`membernumber`,`phone`,`idno`,`residence`,`time`,`pos`,`mgroup`,`status`) VALUES(NULL,'$name','$usid','$row[2]','$row[3]','$row[4]','$residence','$time','$pos','$group',1)");
                          if(!$insert){
-                             $status="fail";break;
+                             $status="fail";
+                             break;
                     
                              }
                              else{
