@@ -454,19 +454,26 @@
 #update member detaild
 	if(isset($_POST['updatee'])){
 		$member=$_POST['updatee'];
-		$username=clean($_POST['username']);
-		$idnum=clean($_POST['idnum']);
-		$phone=clean($_POST['phone']);
-		$num=clean($_POST['sysnumber']);
-		$pos-clean($_POST['grouppos']);
-		$res=clean($_POST['residence']);
+		$grp=$_POST['cgrp'];
+		$username=strlen(clean($_POST['username'])<2)?NULL:clean($_POST['username']);
+		$idnum=strlen(clean($_POST['idnum'])<8)?NULL:clean($_POST['idnum']);
+		$phone=strlen(clean($_POST['phone'])<9)?NULL:clean($_POST['phone']);
+		$num=strlen(clean($_POST['sysnumber'])<0)?NULL:clean($_POST['sysnumber']);
+		$pos=strlen(clean($_POST['grouppos'])<1)?NULL:clean($_POST['grouppos']);
+		$res=strlen(clean($_POST['residence'])<2)?NULL:clean($_POST['residence']);
 		$kin=rtrim($_POST['kin'],",");
 		$nxt='{"'.$kin.'}';
-		$update=mysqli_query($con,"UPDATE `members` SET `name`='$username',`idno`='$idnum',`phone`='$phone',`nextkin`='$nxt',`residence`='$res', `pos`='$pos', `membernumber`='$num' WHERE id='$member'");
-		if($update){
-			echo "success";
-		}else{
-			echo "fail";
+		$select=mysqli_query($con,"SELECT `membernumber` FROM `members` WHERE `membernumber`='$num' AND `mgroup`='$grp'");
+		if(mysqli_num_rows($select)>0){
+			$update=mysqli_query($con,"UPDATE `members` SET `name`='$username',`idno`='$idnum',`phone`='$phone',`nextkin`='$nxt',`residence`='$res', `pos`='$pos', `membernumber`='$num' WHERE id='$member'");
+			if($update){
+				echo "success";
+			}else{
+				echo "fail";
+			}
+		}
+		else{
+			echo 'found';
 		}
 	}
 #external loan

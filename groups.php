@@ -190,7 +190,7 @@ $ccgrp=$_SESSION['grptable'];
 			}
 			$cashin=$cashin+$fee;
 			echo '<tr style="font-weight:600;background:white;border-top:2px solid;border-bottom:1px solid;"><td colspan="2" style="text-align:center;">Subtotal</td><td style="text-align:end;margin-left:10px;">'.$fee.'/=</td></tr></table><div class="row no-gutters" style="justify-content:center;font-weight:600;">Group Savings</div><table style="width:100%;min-width:200px;max-width:900px;"><tr><th>Name</th><th>Type</th><th>Amount</th></tr>';
-			$savs=mysqli_query($con,"SELECT SUM(`sav`.`saving`) AS `saving`,`mb`.`name`,`dep`.`type` FROM `savings` AS `sav` INNER JOIN `members` AS `mb` ON `mb`.`id`=`sav`.`client` INNER JOIN `deposittypes` AS `dep` ON `sav`.`type`=`dep`.`id` WHERE `mgroup`='$ccgrp' AND `sav`.`saving`>0 GROUP BY `dep`.`type`,`mb`.`name`");
+			$savs=mysqli_query($con,"SELECT SUM(`sav`.`saving`) AS `saving`,`mb`.`name`,`dep`.`type` FROM `savings` AS `sav` INNER JOIN `members` AS `mb` ON `mb`.`id`=`sav`.`client` INNER JOIN `deposittypes` AS `dep` ON `sav`.`type`=`dep`.`id` WHERE `mgroup`='$ccgrp' AND `sav`.`saving`>0  GROUP BY `dep`.`type`,`mb`.`name`");
 			$savn=0;
 			if(mysqli_num_rows($savs)>0){
 			foreach($savs as $sav){
@@ -942,8 +942,9 @@ $ccgrp=$_SESSION['grptable'];
 		foreach($select as $m){
 		echo '<div class="col-8 mx-auto" style="max-width:300px;">
 		<form id="upmember" method="post">
-		<input type="hidden" name="updatee" value="'.$updateuser.'">
 		<div class="row no-gutters" style="justify-content:center;"><h3 style="text-align:center;color:#191970;font-size:23px;margin:0px">Update Member Details</h3></div>
+		<input type="hidden" name="updatee" value="'.$updateuser.'">
+		<input type="hidden" name="cgrp" value="'.$m['mgroup'].'">
 		<p><div class="row no-gutters">Member name</div>
 		<div class="row no-gutters"><input style="width:100%;"type="text" name="username" 
 		value="'.ucwords($m['name']).'"></div></p>
@@ -965,7 +966,6 @@ $ccgrp=$_SESSION['grptable'];
 			else{
 				echo '<option>-- No positions-- </option>';
 			}
-		
 		echo '</select></div></p>
 		<p><div class="row no-gutters">Contact</div>
 		<div class="row no-gutters"><input style="width:100%;max-width:300px;" type="number" name="phone" 
@@ -974,7 +974,7 @@ $ccgrp=$_SESSION['grptable'];
 		<div class="row no-gutters"><input style="width:100%;max-width:300px;" type="text" name="residence" 
 		value="'.$m['residence'].'"></div></p>';
 		$id=0;
-		if(strlen($m['nextkin'])>2){
+		if(strlen($m['nextkin'])>5){
 		foreach(json_decode($m['nextkin'],1) as $kin=>$knv){
 			$vls=explode(",",str_replace("[","",str_replace("]","",$knv)));
 			echo '<p><div class="row no-gutters">Next of Kin Name</div>
@@ -2054,13 +2054,13 @@ function deletemember(id,grp){
 		if(e.trim()=="success"){
 		toast("One Member was deleted successfully!")}
 		else{
-			toast("Operation Failed!")
+			toast("Sorry,Your request can not be compeleted!")
 		}
 	})
 }
 function managegroup(grp){
 	moredismiss()
-	$(".grpview").load("groups?managemembers="+grp)
+	$("#content").load("groups?managemembers="+grp)
 }
 function withdraw(grp){
 	moredismiss()
@@ -2070,13 +2070,13 @@ $("#upmember").on("submit",(e)=>{
 	e.preventDefault();	
 	let info=$("#upmember").serializeArray();
 	let data='';
-	for(let i=0;i<5;i++){
+	for(let i=0;i<8;i++){
 		data=data+info[i].name+"="+info[i].value+"&";
 	}
 	data=data.replace(/&\s*$/, "")
 	let more='';
 	let total=0;
-	for(let j=4;j<info.length;j++){
+	for(let j=8;j<info.length;j++){
 		
 		if(info[j].name.includes("name")){
 			
@@ -2093,13 +2093,18 @@ $("#upmember").on("submit",(e)=>{
 	data=data+dt;
 	$.ajax({method:"POST",url:"savemember",data:data,
 	beforeSend:()=>{progress("Updating member..");},
-	complete:()=>{progress()}}).fail(()=>{toast("An error occured updating member!");
+	complete:()=>{progress()}}).fail(()=>{toast("Connection Error! Check Your Network and try again!");
 		closepop();}).done((e)=>{
 		if(e.trim()=="success"){
 			closepop();
-			toast("Member Updated");
+			toast("Member Updated successfully");
 		}
-		
+		else if(e.trim()=='found'){
+			alert('The member number is already taken!');
+		}
+		else{
+			toast("Sorry, Your request can not be compeleted!")
+		}
 	})}
 	
 })
