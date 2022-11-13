@@ -39,6 +39,77 @@ if(isset($_GET['employees'])){
     
     echo '</table></div>';
 }
+//edit deposit type
+if(isset($_GET['editdeposittype'])){
+    echo '<div class="col-6 mx-auto" style="max-width:300px;">
+    <div class="row no-gutters" style="text-align:center;"><h4>Edit Deposit Type</h4></div>
+    <form id="editdepotype" method="post" onsubmit="updatedepo(event)">
+    <p>
+    Deposit type<br>
+    <select name="updatedepotype" onchange="changedepo(this.value)">';
+    $alldeposit=mysqli_query($con,"SELECT * FROM `deposittypes`");
+    if(mysqli_num_rows($alldeposit)>0){
+        foreach($alldeposit AS $depo){
+            echo '<option value="'.$depo['id'].'">'.ucwords($depo['type']).'</option>';
+        }
+    }
+        else{
+            echo '<option>--No deposit type--</option>';
+        }
+    
+    echo '</select></p>';
+$currentdepo=mysqli_query($con,"SELECT * FROM `deposittypes` ORDER BY `id` LIMIT 1");
+foreach($currentdepo AS $dep){
+    
+    echo '<p>
+    Deposit Name<br>
+    <input type="text" name="deponame" value="'.$dep['type'].'" style="max-width:300px;width:100%;">
+    </p>
+    <p>
+    Interest Rate<br>
+    <input style="max-width:300px;width:100%;" type="number" name="deporate" min="1" value="'.$dep['interest'].'">
+    </p>';
+}
+    echo '<div class="row no-gutters" style="justify-content:right;"><button class="btnn" onclick="updatedepo(event)">Update</button></div>
+    </form>
+    </div>';
+}
+//Change deposit type
+if(isset($_GET['changeddepo'])){
+    $currentdepo=$_GET['changeddepo'];
+    echo '<div class="col-6 mx-auto" style="max-width:300px;">
+    <div class="row no-gutters" style="text-align:center;"><h4>Edit Deposit Type</h4></div>
+    <form id="editdepotype" method="post" onsubmit="updatedepo(event)">
+    <p>
+    Deposit type<br>
+    <select name="updatedepotype" onchange="changedepo(this.value)" style="width:100%;max-width:300px;">';
+    $alldeposit=mysqli_query($con,"SELECT * FROM `deposittypes`");
+    if(mysqli_num_rows($alldeposit)>0){
+        foreach($alldeposit AS $depo){
+            $sel=$currentdepo==$depo['id']?'selected':'';
+            echo '<option value="'.$depo['id'].'" '.$sel.'>'.ucwords($depo['type']).'</option>';
+        }
+    }
+        else{
+            echo '<option>--No deposit type--</option>';
+        }
+    
+    echo '</select></p>';
+    $currentdepo=mysqli_query($con,"SELECT * FROM `deposittypes` WHERE `id`='$currentdepo'");
+foreach($currentdepo AS $dep){
+    echo '<p>
+    Deposit Name<br>
+    <input type="text" name="deponame" value="'.$dep['type'].'" style="max-width:300px;width:100%;">
+    </p>
+    <p>
+    Interest Rate<br>
+    <input style="max-width:300px;width:100%;" type="number" name="deporate" min="1" value="'.$dep['interest'].'">
+    </p>';
+    }
+    echo '<div class="row no-gutters" style="justify-content:right;"><button class="btnn" onclick="updatedepo(event)">Update</button></div>
+    </form>
+    </div>';
+}
 //get all loans
 if(isset($_GET['allloans'])){
     echo '<div class="col-11 mx-auto" style="max-width:1240px;">
@@ -504,5 +575,17 @@ if(isset($_GET['accountsdelete'])){
         }
 
     }
+if(isset($_POST['updatedepotype'])){
+    $depo=$_POST['updatedepotype'];
+    $rate=$_POST['deporate'];
+    $type=$_POST['deponame'];
+    $myquery=mysqli_query($con,"UPDATE `deposittypes` SET `type`='$type',`interest`='$rate' WHERE `id`='$depo'");
+    if($myquery){
+        echo 'success';
+    }
+    else{
+        echo 'fail'.mysqli_error($con);
+    }
+}
 mysqli_close($con);
 ?>
