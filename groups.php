@@ -134,11 +134,11 @@ $ccgrp=$_SESSION['grptable'];
 			<div id="options" style="width:100%;padding-left:10px;margin-top:5px;margin-bottom:5px;color:#235a81;cursor:pointer;" onclick="externaldebts('.$ccgrp.')">External Debts</div>
 			<div id="options" style="width:100%;padding-left:10px;margin-top:5px;margin-bottom:5px;color:#235a81;cursor:pointer;" onclick="getxmass('.$ccgrp.')">Xmass Funds Out</div>
 			<div id="options" style="width:100%;padding-left:10px;margin-top:5px;margin-bottom:5px;color:#235a81;cursor:pointer;" onclick="paydebts('.$ccgrp.')">Pay Group Debts </div>
-			<div id="options" style="margin-bottom:5px;width:100%;padding-left:10px;margin-top:5px;margin-bottom:5px;color:#235a81;cursor:pointer;" onclick="managegroup('.$ccgrp.')">Manage Members</div><br></div></div></div><div id="content">';
+			<div id="options" style="margin-bottom:5px;width:100%;padding-left:10px;margin-top:5px;margin-bottom:5px;color:#235a81;cursor:pointer;" onclick="managegroup('.$ccgrp.')">Manage Members</div><br></div></div></div><div>';
 		}
 			echo '<div class="row no-gutters" style="display:flex;flex-direction:row;flex-wrap:nowrap;">
-		<div class="col-12 grpview" style="min-height:400px;width:98%;margin:0 10px;">
-		<div class="table-responsive"><div class="table-responsive" style="min-width:550px;">	
+		<div class="col-12 grpview" id="content" style="min-height:400px;width:98%;margin:0 10px;">
+		<div class="table-responsive"><div style="min-width:550px;">	
 			<table class="table-striped" style="width:100%;font-size:12px;">
 			<tr><td><h5>Cash In</h5></td><td><h5>Cash Out</h5></td></tr><tr><td style="width:50%;padding:0 5px;vertical-align:top;">
 			<div class="row no-gutters" style="justify-content:center;font-weight:600;">Fines and Charges</div>
@@ -341,24 +341,23 @@ $ccgrp=$_SESSION['grptable'];
 			<div class="row no-gutters"><div class="col-col-md-6 col-sm-10 col-lg-5" style="justify-content:space-between;display:flex;flec-direction:row;"><span style="font-weight:600;">Total Savings</span> <span style="font-weight:600;">'.$totalsavings.' KSH</span></div></div>
 			<div class="row no-gutters"><div class="col-col-md-6 col-sm-10 col-lg-5" style="justify-content:space-between;display:flex;flec-direction:row;"><span style="font-weight:600;">GF1</span> <span style="font-weight:600;">'.$gf1.' KSH</span></div></div>
 			<div  class="row no-gutters"><div class="col-col-md-6 col-sm-10 col-lg-5" style="justify-content:space-between;display:flex;flec-direction:row;"><span style="font-weight:600;">TRF2</span> <span style="font-weight:600;">'.$trf2.' KSH</span></div></div>
-			<div class="row no-gutters"><div class="col-col-md-6 col-sm-10 col-lg-5" style="justify-content:space-between;display:flex;flec-direction:row;"><span style="font-weight:600;">GF2</span> <span style="font-weight:600;">0 KSH</span></div></div>
-			</div></div>';
-
+			<div class="row no-gutters"><div class="col-col-md-6 col-sm-10 col-lg-5" style="justify-content:space-between;display:flex;flec-direction:row;"><span style="font-weight:600;">GF2</span> <span style="font-weight:600;">0 KSH</span></div></div></div>';
 		 echo '</div>';
 	}
 	#fetch all members
 	if(isset($_GET['groupopts'])){
 		$grp=$_GET['groupopts'];
-		echo '</div><div class="row no-gutters" style="justify-content:right;margin:0 20px;"><button class="btnn" style="float:right;" onclick="newgroupmember()"><i class="bi-person-plus"></i> Add Member</button></div><div class="row no-gutters" style="display:flex;flex-direction:row;flex-wrap:nowrap;">
+		echo '</div><div class="row no-gutters" style="justify-content:right;margin:10px 20px;"><button class="btnn" style="float:right;" onclick="newgroupmember()"><i class="bi-person-plus"></i> Add Member</button></div><div class="row no-gutters" style="display:flex;flex-direction:row;flex-wrap:nowrap;">
 		';
-		$allmembers=mysqli_query($con,"SELECT `mb`.*,`gp`.`position` FROM `members` AS `mb` INNER JOIN `grouppositions` AS `gp` ON `mb`.`pos`=`gp`.`id` WHERE `mb`.`mgroup`='$ccgrp' AND `mb`.`status`=1");
+		$allmembers=mysqli_query($con,"SELECT `mb`.*,`gp`.`position` FROM `members` AS `mb` INNER JOIN `grouppositions` AS `gp` ON `mb`.`pos`=`gp`.`id` WHERE `mb`.`mgroup`='$ccgrp' AND `mb`.`status`=1 ORDER BY `membernumber`");
 			if(mysqli_num_rows($allmembers)>0){
 		echo '<table class="table-striped" style="width:100%;min-width:530px;margin:0px auto;" id="cgrouptable">
 		<tr style="background:#e6e6fa;color:#191970;font-weight:bold;font-size:14px;font-family:cambria;line-height:30px;">
-		<td style="padding-left:5px;">Member</td><td>Member Number</td><td style="padding-left:5px;">Total Savings</td>
+		<td style="width:15px;">Id</td><td style="padding-left:10px;">Member</td><td>Member Number</td><td style="padding-left:5px;">Total Savings</td>
 		<td style="padding-left:5px;">Total Loan</td><td>Position</td><td style="text-align:center;">Activity</td></tr>';
-		
+		$i=0;
 		foreach($allmembers as $all){
+			$i++;
 			$cli=$all['id'];
 			$clipos=$all['pos'];
 			$loans=mysqli_query($con,"SELECT `history`,`paid` FROM `loans` WHERE `client`='$cli'");$amt=0;
@@ -370,7 +369,7 @@ $ccgrp=$_SESSION['grptable'];
 				$sav=$sav+$s['saving'];
 			}
 			$optio='<button style="border:1px solid green;background:green;color:white;border-radius:1px;min-width:50px;margin:5px;" onclick="newactivity('.$all['id'].')">Select</button>';
-			echo '<tr style="margin:5px;padding:5px;"><td>'.ucwords($all['name']).'</td><td>'.$all['membernumber'].'</td><td style="cursor:pointer;" onclick="displaySavings('.$all['id'].')">'.$sav.'</td><td style="padding:2px;cursor:pointer;" onclick="getloans('.$all['id'].')">'.$amt.'</td><td style="cursor:pointer;" onclick="changepos('.$grp.','.$all['id'].')">'.ucwords($all['position']).'</td><td style="text-align:center;">'.$optio.'</td></tr>';
+			echo '<tr style="margin:5px;padding:5px;"><td>'.$i.'</td><td style="padding-left:5px;">'.ucwords($all['name']).'</td><td>'.$all['membernumber'].'</td><td style="cursor:pointer;" onclick="displaySavings('.$all['id'].')">'.$sav.'</td><td style="padding:2px;cursor:pointer;" onclick="getloans('.$all['id'].')">'.$amt.'</td><td style="cursor:pointer;" onclick="changepos('.$grp.','.$all['id'].')">'.ucwords($all['position']).'</td><td style="text-align:center;">'.$optio.'</td></tr>';
 		
 			 }
 	 
@@ -924,15 +923,17 @@ $ccgrp=$_SESSION['grptable'];
 	if(isset($_GET['managemembers'])){
 		$grp=$_GET['managemembers'];
 		echo '<div class="col-11 mx-auto" style="width:100%;">
-		<div class="row no-gutters" style="justify-content:center;font-weight:600;"><h4>Manage Group Members</h4></div>
+		<div class="row no-gutters" style="justify-content:center;font-weight:600;margin-bottom:10px;"><h4>Manage Group Members</h4></div>
+		<div class="row no-gutters" style="margin-bottom:5px;"><select onchange="managegroupcategory(this.value)"><option value="1"> Active members</option><option value="2">Deleted Members</option></select></div>
 		<table class="table-striped" style="width:100%;">
-		<tr style="background:#e6e6fa;width:100%;color:#191970;font-weight:bold;font-size:14px;font-family:cambria;line-height:30px;padding-left:5px"><td>Name</td><td>ID</td><td>Contact</td><td>State</td></tr>';
-		$members=mysqli_query($con,"SELECT * FROM `members` WHERE `mgroup`='$grp'");
+		<tr style="background:#e6e6fa;width:100%;color:#191970;font-weight:bold;font-size:14px;font-family:cambria;line-height:30px;padding-left:5px"><td>Name</td><td>ID</td><td>Contact</td><td>State</td></tr><tbody class="managems">';
+		$members=mysqli_query($con,"SELECT * FROM `members` WHERE `mgroup`='$grp' AND `status`=1");
 		foreach($members as $qry){
+			$phone=strlen($qry['phone'])>8 && strlen($qry['phone'])<13? '0'.$qry['phone']:'None';
 			$stat=$qry['status']==1?'<td onclick="deletemember('.$qry['id'].','.$grp.')"><i class="bi bi-trash" style="cursor:pointer;color:red;font-size:20px;"></i></td>':'<td style="background:;color:red;font-weight:600;">Deleted<td>';
-			echo '<tr style="line-height:30px;cursor:pointer;"><td onclick="updatemember('.$qry['id'].')">'.ucwords($qry['name']).'</td><td onclick="updatemember('.$qry['id'].')">'.$qry['idno'].'</td><td onclick="updatemember('.$qry['id'].')">0'.$qry['phone'].'</td>'.$stat.'</tr>';
+			echo '<tr style="line-height:30px;cursor:pointer;"><td onclick="updatemember('.$qry['id'].')">'.ucwords($qry['name']).'</td><td onclick="updatemember('.$qry['id'].')">'.$qry['idno'].'</td><td onclick="updatemember('.$qry['id'].')">'.$phone.'</td>'.$stat.'</tr>';
 		}
-		echo '</table></div>
+		echo '</tbody></table></div>
 		
 		</div>'; 
 	}
@@ -1613,8 +1614,16 @@ $ccgrp=$_SESSION['grptable'];
 		$memb=clean($_GET['newactivity']);
 		echo '<div style="text-align:center;"><h3 style="text-align:center;color:#191970;font-size:23px;margin:0px">Member Activity</h3></div>
 		<div class="col-8 mx-auto" style="max-width:300px;">
+		<div class="row no-gutters" style="textalign:center;justify-content:center;margin-top:10px;margin-bottom:10px;font-weight:bold;">';
+		$select= mysqli_query($con,"SELECT `name` FROM `members` WHERE `id`='$memb'");
+		foreach($select as $sel){
+			echo ucwords($sel['name']);
+		}
+		echo '</div></p>
 		<form method="post" id="compactivity">
 		<input type="hidden" name="acmemb" value="'.$memb.'">
+		<p><div class="row no-gutters">Date</div>
+		<div class="row no-gutters"><input type="date" style="width:100%;max-width:300px;" max="'.date('Y-m-d',time()).'"name="date" value="'.date('Y-m-d',time()).'" required></div></p>
 		<div id="membnewact">
 		<p>
 		<div class="row no-gutters">Saving Type</div>
@@ -1663,8 +1672,6 @@ $ccgrp=$_SESSION['grptable'];
 		Risk Fund<br>
 		<input type="number" name="riskfund" value="0" style="max-width:300px;width:100%;">
 		</p>
-		<p><div class="row no-gutters">Date</div>
-		<div class="row no-gutters"><input type="date" style="width:100%;max-width:300px;" max="'.date('Y-m-d',time()).'"name="date" value="'.date('Y-m-d',time()).'" required></div></p>
 		<div class="row no-gutters" style="justify-content:end;margin-top:10px;"><button class="btn btn-success">Complete</div><br>
 		</form></div>';
 	}
@@ -1805,17 +1812,19 @@ $("#loanreq").on("submit",(e)=>{
 	$.ajax({data:data,method:"POST",url:"savemember",
 	beforeSend:()=>{progress("sending data");},
 	complete:()=>{progress();}}).fail(
-	(e)=>{toast("Failed requesting loan");}).done((e)=>{
-		console.log(e.trim())
+	(e)=>{toast("Failed requesting loan");
+	}).done(
+		(e)=>{
 		tbload();
-		if(e.trim()=="success"){closepop();
-			getgroupops(currentgroup)
-			toast("Loan Application was successfull!")
-		}else if(e.trim()=="low"){
-			toast("The A/C balance is not sufficient to complete the request");
-		}else{
-		toast("Failed to request loan!");
-	}})
+			if(e.trim()=="success"){closepop();
+				getgroupops(currentgroup)
+				toast("Loan Application was successfull!")
+			}else if(e.trim()=="low"){
+				toast("The A/C balance is not sufficient to complete the request");
+			}else{
+			toast("Failed to request loan!");
+		}
+	})
 })
 $("#paydebt").on("submit",(e)=>{
 	e.preventDefault();
@@ -1826,7 +1835,6 @@ $.ajax({method:"POST",data:data,url:"savemember",
 	}).fail(()=>{
 		toast("Internet Connection Error! Please try again later")
 	}).done((e)=>{
-		console.log(e.trim());
 	if(e.trim()=="success"){
 		toast("Request compeleted successfully");
 		closepop();
@@ -1863,7 +1871,6 @@ $("#invest").on("submit",(e)=>{
 		}).fail(
 		(e)=>{toast("Failed to complete request");
 		}).done((e)=>{
-			console.log(e.trim())
 			tbload();
 			if(e.trim()=="success"){
 				closepop()
@@ -1946,7 +1953,6 @@ $("#exdt").on("submit",(e)=>{
 			()=>{toast("An Error occured Updating debt")}
 		).done((e)=>{
 			let dt=e.trim();
-			console.log(dt)
 			if(dt=="success"){
 				closepop();
 				toast("Request compeleted successfully!")
@@ -1991,7 +1997,6 @@ $("#withdr").on("submit",(e)=>{
 		complete:()=>{progress()}
 	}).fail(()=>{toast("The system encountered a connection problem!")}).done(
 		(e)=>{
-			console.log(e.trim());
 			if(e.trim()=="success"){
 				toast("Transaction accepted");
 				closepop();
@@ -2050,9 +2055,10 @@ function deletemember(id,grp){
 		beforeSend:()=>{progress("Deleting Member from group")},
 		complete:()=>{progress()}
 	}).fail(()=>{toast("Request can not be compeleted!")}).done((e)=>{
-		$(".grpview").load("groups?managemembers="+grp)
+		$("#content").load("groups?managemembers="+grp)
 		if(e.trim()=="success"){
-		toast("One Member was deleted successfully!")}
+		toast("One Member was deleted successfully!")
+		managegroup(grp);}
 		else{
 			toast("Sorry,Your request can not be compeleted!")
 		}
@@ -2101,6 +2107,9 @@ $("#upmember").on("submit",(e)=>{
 		}
 		else if(e.trim()=='found'){
 			alert('The member number is already taken!');
+		}
+		else if(e.trim()=='short'){
+			alert('The username is too short!');
 		}
 		else{
 			toast("Sorry, Your request can not be compeleted!")
@@ -2161,7 +2170,6 @@ function deletegroup(id){
 		}
 	})
 }
-
 function addnkin(){
 	$("#newh").append('<p><div class="row no-gutters">Next of Kin Name</div><div class="row no-gutters">'
 	+'<input style="width:100%;max-width:300px;" type="text" name="name"></div></p><p><div class="row no-gutters">Contact</div>'+
@@ -2199,7 +2207,6 @@ function moredismiss(){
 	$(".more").hide();
 }
 function changecharges(id){
-	
 	$(".type").load('savemember?chargetp='+id);
 }
 $(window).on('resize',(e)=>{getmorepos()})
@@ -2242,9 +2249,8 @@ let len=narr.length;
 	let data='acmember='+narr[0].value+'&loans={'+loan+'}&deposits={'+deposit+'}&risk='+narr[len-2].value+'&recdate='+narr[len-1].value;
 	$.ajax({method:'POST',data:data,url:'savemember'}).fail(()=>{toast("Connection Error! Check your internet connection and try again!")}).done(
 		(e)=>{
-			console.log(e.trim())
 			if(e.trim()=="success"){
-				getgroupops(currentgroup)
+				getgroupops(currentgroup())
 				closepop();
 				toast("Request compeleted successfully!");
 			}
@@ -2268,15 +2274,38 @@ function lendercategory(name){
 function searchgroupname(str){
 	if(str.length>=3){
 		$("#pgnation").hide();
-		$.get('savemember?searchgroup='+str,(data,textStatus)=>{$(".mtb1").html(data)}
+		$.get('savemember?searchgroup='+str,(data)=>{$(".mtb1").html(data)}
 				)
 	}
 	else{
 		$("#pgnation").show();
-		$.ajax('savemember?allgroups',(data,txt)=>{$(".mtb1").html(data);console.log(data,txt,st)});
+		$.ajax('savemember?allgroups',(data,txt)=>{$(".mtb1").html(data);});
 	}
 }
 function newgroupmember(){
 	popupload('groups?groupmembernew');
+}
+function managegroupcategory(vl){
+	let group= currentgroup();
+	console.log(vl);
+	$.get('savemember?mnggroup='+group+'&type='+vl,(data,)=>{$('.managems').html(data)});
+}
+function activatemember(id,group){
+	let data='thismember='+id+'&thisgroup='+group;
+	$.ajax({url:"savemember",data:data,method:'POST'}).fail(toast('Internet Connection Error! Request failed to process.')).done(
+		(e)=>{
+			progress("Processing request...");
+			if(e.trim()=='success'){
+				progress();
+				toast("Request processed successfully!");
+				managegroupcategory(2);
+			}
+			else{
+				progress();
+				toast("Sorry, You request Could not be executed successfully!");
+				managegroupcategory(2);
+			}
+		}
+	)
 }
 </script> 
