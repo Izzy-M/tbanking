@@ -186,7 +186,7 @@
 								$mid=$row['id']; $name=ucwords(prepare($row['name'])); $uid=$row['uid']; $fon=$row['phone']; $idno=$row['idno'];
 								$pic=strlen($row['photo'])>1?'data:image/jpg;base64,'.$row['photo']:'assets/img/user.png';
 								$kinname=[];$kincont=[];
-								if(strlen($row['nextkin'])>2){
+								if(strlen($row['nextkin'])>5 && !is_null($row['nextkin'])){
 								foreach(json_decode(@$row['nextkin'],1) as $kin=>$kindet){
 									$kcont=explode(",",str_replace(']','',str_replace('[','',$kindet)));
 									array_push($kinname,$kin);array_push($kincont,$kcont[0]);
