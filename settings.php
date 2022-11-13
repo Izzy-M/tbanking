@@ -39,10 +39,10 @@ echo '<div class="container-fluid">
      </div></div>
 <div class="card col-xs-11 col-sm-5 mx-sm-auto mx-lg-4 mx-auto" style="max-width:450px;min-width:300px;min-height:150px;padding:0px;"><div class="card-header" style="text-align:center;height:40px;"><h5><i class="fas fa-donate" style="color:#4682b4;"></i> &nbsp; Deposit Management</h5></div><div class="card-body" style="font-size:14px;font-family:google-sans,Roboto,\'Open-Sans\',helvetica;padding:0px;">
 <div class="row no-gutters setopt" onclick="addsaving()"><i class="bi bi-plus" style="font-size:20px;color:green;"></i> &nbsp; Add deposit type</div>
-<div class="row no-gutters setopt"><i class="fa fa-user-edit"></i> &nbsp; Edit deposit type</div>
+<div class="row no-gutters setopt" onclick="popupload(\'managesettings?editdeposittype\')"><i class="fa fa-user-edit"></i> &nbsp; Edit deposit type</div>
 <div class="row no-gutters setopt"><i class="fa fa-user-times"></i> &nbsp; Delete deposit type</div>
 <div class="row no-gutters setopt" onclick="popupload(\'loan?charges\')"><i class="fa fa-coins" style="color:green;font-size:20px;"></i>&nbsp; Add Charges </div>
-<!--<div class="row no-gutters setopt" onclick="popupload(\'loan?charges\')"><i class="fa fa-trash" style="color:red;font-size:20px;"></i>&nbsp; Deleted deposit list </div>-->
+<!--<div class="row no-gutters setopt" onclick="popupload(\'savemember?updategroupdepo\')"><i class="fa fa-history" style="color:green;font-size:20px;"></i>&nbsp; Update Deposit</div>-->
 </div></div>
 <div class="card col-xs-11 col-sm-5 mx-sm-auto mx-lg-4 mx-auto" style="max-width:450px;min-width:300px;min-height:150px;padding:0px;"><div class="card-header" style="text-align:center;height:40px;"><h5><i class="fas fa-gifts" style="color:#4682b4;"></i> &nbsp; Accounting Management</h5></div><div class="card-body" style="font-size:14px;font-family:google-sans,Roboto,\'Open-Sans\',helvetica;padding:0px;">
 <div class="row no-gutters setopt" onclick="popupload(\'managesettings?accountsedit\')"> <i class="fa fa-pencil-alt" style="font-size:20px;color:green;"></i> &nbsp; Edit Account</div>
@@ -450,9 +450,8 @@ function deleteaccount(id){
             data:data,
             beforeSend:()=>{progress("Deleting account...");},
             complete:()=>{progress();}
-            }).fail(()=>{closepop();toast("Connection Error:Internet Connection error!");}).done(
+            }).fail(()=>{closepop();toast("Connection Error:Request Fa");}).done(
             (e)=>{
-                console.log(e.trim())
             if(e.trim()=="success"){
             closepop();toast("Account deleted successfully");
             }else if(e.trim()=="fail"){
@@ -463,5 +462,26 @@ function deleteaccount(id){
                 }
             })
 }
+function updatedepo(e){
+    e.preventDefault();
+    let data=$("#editdepotype").serialize();
+    console.log(data)
+        $.ajax({'method':"POST",data:data,url:"managesettings",beforeSend:()=>{progress("Updating deposit type...")},complete:()=>{progress()}}).fail(toast("Intenet Connection Error! Request could not be compeleted.")).done(
+            (e)=>{
+                if(e.trim()=="success"){
+                    closepop();
+                    toast("Deposit type updated successfully");
+                }
+                else{
+                    toast("Sorry,the deposit type could not be updated!")
+                }
+            }
+        )
+    }
+function changedepo(val){
+    $.get('managesettings?changeddepo='+val,(data)=>{
+        $(".popdiv").html(data);
+    })
 
+}
 </script>
