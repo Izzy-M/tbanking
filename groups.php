@@ -380,42 +380,6 @@ $ccgrp=$_SESSION['grptable'];
 		}
 	
 	}
-	#invest money
-	if(isset($_GET['investmoney'])){
-		$group=$_GET['investmoney'];
-		echo '<div style="text-align:center;"><h3 style="text-align:center;color:#191970;font-size:23px;margin:0px">Deposit Money</h3></div>
-		<div class="col-8 mx-auto" style="max-width:300px;">
-		<form method="post" id="invest">
-		<input type="hidden" name="ingroup" value="'.$group.'">
-		<p><div class="row no-gutters">Select Member</div>
-		<div class="row no-gutters"><select style="max-width:300px;width:100%;" name="investor">';
-		$membs=mysqli_query($con,"SELECT `id`,`membernumber` FROM `members` WHERE `status`=1 AND `mgroup`='$group'");
-		if(mysqli_num_rows($membs)>0){
-		foreach($membs as $memb){
-		echo '<option value="'.$memb['id'].'">'.$memb['membernumber'].'</option>';}
-		}
-		else{echo '<option value="0">Not available</option>';}
-		
-		echo '</select></div></p>
-		<p><div class="row no-gutters">Saving Type</div>
-		<div class="row no-gutters"><select style="max-width:300px;width:100%;" name="type">';
-		$deptyps= mysqli_query($con,"SELECT `id`,`type` FROM `deposittypes`");
-		if(mysqli_num_rows($deptyps)>0){
-		foreach($deptyps as $det){
-			echo '<option value="'.$det['id'].'">'.$det['type'].'</option>';
-		}
-		}
-		else{
-			echo '<option value="0">No Availabe deposit type</option>';
-		}
-		echo'</select></div></p>
-		<p><div class="row no-gutters">Deposit Amount</div>
-		<div class="row no-gutters"><input type="number" style="width:100%;max-width:300px;" name="amount" required></div></p>
-		<p><div class="row no-gutters">Date deposited</div>
-		<div class="row no-gutters"><input type="date" style="width:100%;max-width:300px;" max="'.date('Y-m-d',time()).'"name="date" value="'.date('Y-m-d',time()).'" required></div></p>
-		<div class="row no-gutters" style="justify-content:end;margin-top:10px;"><button class="btn btn-success">Save</div><br>
-		</form></div>';
-	}
 	#lend money
 	if(isset($_GET['loanmoney'])){
 		$grp=$_GET['loanmoney'];
@@ -2246,7 +2210,8 @@ let len=narr.length;
 	})
 	let loan=loans.replace(/(^,)|(,$)/g, '');
 	let deposit=deposits.replace(/(^,)|(,$)/g, '');
-	let data='acmember='+narr[0].value+'&loans={'+loan+'}&deposits={'+deposit+'}&risk='+narr[len-2].value+'&recdate='+narr[len-1].value;
+	let data='acmember='+narr[0].value+'&loans={'+loan+'}&deposits={'+deposit+'}&risk='+narr[len-1].value+'&recdate='+narr[1].value;
+	console.log(data)
 	$.ajax({method:'POST',data:data,url:'savemember'}).fail(()=>{toast("Connection Error! Check your internet connection and try again!")}).done(
 		(e)=>{
 			if(e.trim()=="success"){
