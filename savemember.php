@@ -150,6 +150,7 @@
 		elseif(!in_array($ext,$get)){ echo "Failed: Image extension $ext is not supported"; }
 		elseif(mysqli_num_rows($chk1)){ echo "Failed: Phone number 0$fon is already in the system"; }
 		elseif(mysqli_num_rows($chk2)){ echo "Failed: Id number $idno is already in use"; }
+		elseif(count(explode(' ',$cname))<2){echo 'Failed: The username is too short';}
 		else{
 			$img = "Prof_".date("Ymd_His").".$ext"; 
 			$mgrp = $grp; $uid=gentrans(); $tym=time();
@@ -210,40 +211,7 @@
 		else{
 			echo "low";
 		}
-	}
-#saving to member account
-	if(isset($_POST['investor'])){
-		$client=$_POST['investor'];
-		$other=$_POST['other'];
-		$group=$_POST['ingroup'];
-		$time=time();
-		$month=strtotime(date('M-Y'));
-		$all= "{".$other."}";
-		foreach(json_decode($all,1) as $key=>$value){
-		if($value>0){
-		$gss=mysqli_query($con,"SELECT `savings`,`cpool` FROM `groups` WHERE `id`='$group'");
-		foreach($gss as $gs){
-			$princ=$gs['savings'];$pol=$gs['cpool'];
-		}
-		$lprin=$princ+$value;$lpol=$pol+$value;
-	
-			$insert=mysqli_query($con,"INSERT INTO `savings`(`id`,`client`,`saving`,`time`,`month`,`type`) VALUES(NULL,'$client','$value','$time','$month','$key')");
-			$upp=mysqli_query($con,"UPDATE `groups` SET `savings`='$lprin',`cpool`='$lpol' WHERE `id`='$group'");
-			if(!$insert && !$upp){
-				$res='fail';}else{$res="success";}
-			}
-			if($res!=="success"){
-				break;
-			}
-		}
-		if($res==="success"){
-			echo "success";
-		}
-		else{
-			echo "fail";
-		}
-		}
-	
+	}	
 #pay loan
 	if(isset($_POST['payee'])){
 		$payee=$_POST['payee'];
@@ -455,25 +423,30 @@
 	if(isset($_POST['updatee'])){
 		$member=$_POST['updatee'];
 		$grp=$_POST['cgrp'];
-		$username=strlen(clean($_POST['username'])<2)?NULL:clean($_POST['username']);
-		$idnum=strlen(clean($_POST['idnum'])<8)?NULL:clean($_POST['idnum']);
-		$phone=strlen(clean($_POST['phone'])<9)?NULL:clean($_POST['phone']);
-		$num=strlen(clean($_POST['sysnumber'])<0)?NULL:clean($_POST['sysnumber']);
-		$pos=strlen(clean($_POST['grouppos'])<1)?NULL:clean($_POST['grouppos']);
-		$res=strlen(clean($_POST['residence'])<2)?NULL:clean($_POST['residence']);
+		$username=clean($_POST['username']);
+		$idnum=clean($_POST['idnum']);
+		$phone=clean($_POST['phone']);
+		$num=clean($_POST['sysnumber']);
+		$pos=clean($_POST['grouppos']);
+		$res=clean($_POST['residence']);
 		$kin=rtrim($_POST['kin'],",");
 		$nxt='{"'.$kin.'}';
-		$select=mysqli_query($con,"SELECT `membernumber` FROM `members` WHERE `membernumber`='$num' AND `mgroup`='$grp'");
-		if(mysqli_num_rows($select)>0){
+		if(count(explode(' ',$username))>=2){
+		$select=mysqli_query($con,"SELECT * FROM `members` WHERE `membernumber`='$num' AND `mgroup`='$grp'");
+		if(mysqli_num_rows($select)<=1){
 			$update=mysqli_query($con,"UPDATE `members` SET `name`='$username',`idno`='$idnum',`phone`='$phone',`nextkin`='$nxt',`residence`='$res', `pos`='$pos', `membernumber`='$num' WHERE id='$member'");
 			if($update){
 				echo "success";
-			}else{
+				}else{
 				echo "fail";
+				}
+			}
+			else{
+				echo 'found';
 			}
 		}
 		else{
-			echo 'found';
+			echo 'short';
 		}
 	}
 #external loan
@@ -818,7 +791,7 @@
 		foreach($depos as $dep=>$amt){
 		
 			if($amt>0){
-				$insert=mysqli_query($con,"INSERT INTO `savings` VALUES (NULL,'$member','$amt','$dep','{}','$now','$month')");
+				$insert=mysqli_query($con,"INSERT INTO `savings` VALUES (NULL,'$member','$amt','$dep','{}','$now','$month','$date')");
 				if(!$insert){
 					$donedeposit=false;
 				}
@@ -963,6 +936,216 @@ if(isset($_GET['allgroups'])){
 				echo "<tr style='cursor:not-allowed;height:30px;'><td>$no</td><td>$name</td><td>$gid</td><td>$sum</td><td style='color:#f8c753;'>Suspended</td></tr>";
 			}
 		}
+}
+#get group active and suspendend members
+if(isset($_GET['mnggroup'])){
+	$grp=$_GET['mnggroup'];
+	$type=$_GET['type'];
+	if($type==1){
+		$members=mysqli_query($con,"SELECT * FROM `members` WHERE `mgroup`='$grp' AND `status`=1");
+		foreach($members as $qry){
+			$phone=strlen($qry['phone'])>8 && strlen($qry['phone'])<13? '0'.$qry['phone']:'None';
+			$stat=$qry['status']==1?'<td onclick="deletemember('.$qry['id'].','.$grp.')"><i class="bi bi-trash" style="cursor:pointer;color:red;font-size:20px;"></i>Delete</td>':'<td></td>';
+			echo '<tr style="line-height:30px;cursor:pointer;"><td onclick="updatemember('.$qry['id'].')">'.ucwords($qry['name']).'</td><td onclick="updatemember('.$qry['id'].')">'.$qry['idno'].'</td><td onclick="updatemember('.$qry['id'].')">'.$phone.'</td>'.$stat.'</tr>';
+		}
+	}
+	else{
+	$members=mysqli_query($con,"SELECT * FROM `members` WHERE `mgroup`='$grp' AND `status`>1");
+		foreach($members as $qry){
+			$phone=strlen($qry['phone'])>8 && strlen($qry['phone'])<13? '0'.$qry['phone']:'None';
+			$stat=$qry['status']!==1?'<td style="color:green;" onclick="activatemember('.$qry['id'].','.$grp.')"><i class="fas fa-user-check" style="cursor:pointer;color:green;font-size:18px;"></i> Activate</td>':'<td style="background:;color:red;font-weight:600;"><td>';
+			echo '<tr style="line-height:30px;cursor:pointer;"><td>'.ucwords($qry['name']).'</td><td>'.$qry['idno'].'</td><td >'.$phone.'</td>'.$stat.'</tr>';
+		}
+	}
+}
+
+#Activate group member
+if(isset($_POST['thismember'])){
+	$member=$_POST['thismember'];
+	$group=$_POST['thisgroup'];
+	$query=mysqli_query($con,"UPDATE `members` SET `status`=1 WHERE `id`='$member' AND `mgroup`='$group'");
+	if($query){
+		echo 'success';
+	}
+	else{
+		echo 'fail';
+	}
+}
+if(isset($_GET['updategroupdepo'])){
+	echo '<div class="col-6 mx-auto" style="max-width:300px;width:100%;">
+	<div class="row no-gutters" style="text-align:center;"><h5>Update Group Deposits</h5></div>
+	<form id="updateloan" method="post" onsubmit="updateloan(event)">
+	<p id="grpdet">Group Name<br>
+	<input type="text" list="glist" name="updategroup" onchange="glistgroup(this.value)" style="width:100%;max-width:300px;">
+	<datalist id="glist">';
+	$allgroup=mysqli_query($con,"SELECT * FROM `groups` WHERE `status`=1");
+	foreach($allgroup AS $grop){
+	echo '<option value="'.ucwords($grop['name']).'"></option>';
+	}
+	echo '</datalist>
+	</p>
+	<div>
+	<p>Member name<br>
+	<select id="cmemberid" onchange="getactivemember(this.value)" style="width:100%;max-width:300px;" name="activemember">
+	<option>-- Select Member --</option>
+	</select></p>
+	<p>Select Date<br>
+	<select id="activedate" name="activedate" style="width:100%;max-width:300px;" onchange="getdepodate(this.value)">
+	<option>--Select Date--</option></select></p><p>
+	Select type<br>
+	<select name="type" style="width:100%;max-width:300px;" id="currentsaves" onfocus="getallof()" onchange="alldatedepos(this.value)">
+	<option>--No Deposit--</option></select></p>
+	<div id="savdet">
+	<p>
+	Amount<br>
+	<input type="number" style="width:100%;max-width:300px;" name="savingamount" id="savingamount">
+	</p>
+	<p>
+	Deposit type<br>
+	<select id="defaultsave" name="defaulttype">';
+	$alltypes=mysqli_query($con,"SELECT *FROM `deposittypes`");
+	if(mysqli_num_rows($alltypes)>0){
+		foreach($alltypes as $type){
+			echo '<option value="'.$type['id'].'">'.$type['type'].'</option>';
+		}	
+	}
+	else{
+		echo '<option> --No deposit types --</option>';
+	}
+	echo '</select>
+	</p>
+	</div>
+	<p>
+	<div class="row no-gutters" style="justify-content:right;" onclick="updateloan(event)"><button class="btnn">Update</button></div></p>
+	</form>
+	</div>
+	</div>';
+}
+if(isset($_GET['currentmembers'])){
+	$name=$_GET['currentmembers'];
+	$members=mysqli_query($con,"SELECT `mb`.* FROM `members` AS `mb` INNER JOIN `groups` AS `gr` ON `mb`.`mgroup`=`gr`.`id` WHERE `mb`.`status`=1 AND `gr`.`name`='$name' ORDER BY `mb`.`membernumber`");
+	if(mysqli_num_rows($members)>0){
+		foreach($members as $memb){
+			echo '<option value="'.$memb['id'].'">'.ucwords($memb['name']).'</option>';
+	}
+	}
+	else{
+		echo '<option> -- No Members -- </option>';
+	}
+}
+if(isset($_GET['activemembers'])){
+	$memberid=$_GET['activemembers'];
+	$alldepos=mysqli_query($con,"SELECT * FROM `savings` WHERE `client`='$memberid' GROUP BY `date`");
+	if(mysqli_num_rows($alldepos)>0){
+		foreach($alldepos AS $deps){
+			echo '<option value="'.$deps['date'].'">'.$deps['date'].'</option>';
+			}
+	}
+	else{
+		echo '<option>-- No deposits --</option>';
+	}
+}
+if(isset($_GET['activedate'])){
+	$date=$_GET['activedate'];
+	$selects=mysqli_query($con,"SELECT * FROM `savings` WHERE `date`='$date'");
+	if(mysqli_num_rows($selects)>0){
+		foreach($selects as $sel){
+	
+			$ssl=$sel['type'];
+			$querys=mysqli_query($con,"SELECT * FROM `deposittypes` WHERE `id`='$ssl'");
+			foreach($querys AS $qry){
+			echo '<option value="'.$sel['id'].'">'.$qry['type'].'</option>';
+			}
+		}
+	}
+	else{
+		echo '<option>-- No Deposits</option>';
+	}
+}
+if(isset($_GET['currentsavingamount'])){
+	$id=$_GET['currentsavingamount'];
+	$query=mysqli_query($con,"SELECT `saving` FROM `savings` WHERE `id`='$id'");
+	foreach($query AS $qry){
+		echo $qry['saving'];
+	}
+
+}
+if(isset($_GET['currentsavingtype'])){
+	$type=$_GET['currentsavingtype'];
+	$deposittype=mysqli_query($con,"SELECT `type` FROM `savings` WHERE `id`='$type'");
+	foreach($deposittype AS $ttype){
+		$deptype=$ttype['type'];
+	}
+	$query=mysqli_query($con,"SELECT * FROM `deposittypes`");
+	foreach($query AS $qry){
+		$select=$qry['id']==$deptype?'selected':'';
+		echo '<option value="'.$qry['id'].'" '.$select.'> '.ucwords($qry['type']).'</option>';
+		
+	}
+
+}
+#update deposit account
+if(isset($_POST['defaulttype'])){
+	$newtype=$_POST['defaulttype'];
+	$saveid=$_POST['type'];
+	$newamount=$_POST['savingamount'];
+	$group=$_POST['updategroup'];
+	$groups=mysqli_query($con,"SELECT * FROM `groups` WHERE `name`='$group' FOR UPDATE");
+	foreach($groups as $grp){
+		$cpool=$grp['cpool'];$totalaccount=$grp['savings'];$groupid=$grp['id'];
+	}
+	$myquery=mysqli_query($con,"SELECT * FROM `savings` WHERE `id`='$saveid' FOR UPDATE");
+	foreach($myquery as $query){
+		$amount=$query['saving'];$type=$query['type'];
+	}
+	if($newamount>$amount){
+		$bal=$newamount-$amount;
+		$newpool=$cpool+$bal;
+		$newsaving=$totalaccount+$bal;
+		$updateaccount=mysqli_query($con,"UPDATE `savings` SET `saving`='$newamount',`type`='$newtype' WHERE `id`='$saveid'");
+		$updategroup=mysqli_query($con,"UPDATE `groups` SET `cpool`='$newpool',`savings`='$newsaving' WHERE `id`='$groupid'");
+		if($updateaccount){
+			if($updategroup){
+				echo 'success';
+			}
+			else{
+				mysqli_query($con,"UPDATE `savings` SET `saving`='$amount',`type`='$newtype' WHERE `id`='$saveid'");
+				echo 'fail';
+			}
+		}
+		else{
+			echo 'fail';
+		}
+	}
+	else if($amount==$newamount){
+		$updateaccount=mysqli_query($con,"UPDATE `savings` SET `saving`='$newamount',`type`='$newtype' WHERE `id`='$saveid'");
+		if($updateaccount){
+			echo 'success';
+		}
+		else{
+			echo 'fail';
+		}
+	}
+	else{
+		$bal=$amount-$newamount;
+		$newpool=$cpool-$bal;
+		$newsaving=$totalaccount-$bal;
+		$updateaccount=mysqli_query($con,"UPDATE `savings` SET `saving`='$newamount',`type`='$newtype' WHERE `id`='$saveid'");
+		$updategroup=mysqli_query($con,"UPDATE `groups` SET `cpool`='$newpool',`savings`='$newsaving' WHERE `id`='$groupid'");
+		if($updateaccount){
+			$updategroup=mysqli_query($con,"UPDATE `groups` SET `cpool`='$newpool',`savings`='$newsaving' WHERE `id`='$groupid'");
+			if($updategroup){
+				echo 'success';
+			}
+			else{
+			mysqli_query($con,"UPDATE `savings` SET `saving`='$amount',`type`='$newtype' WHERE `id`='$saveid'");
+			echo 'fail'.mysqli_error($con);
+			}
+		}
+		else{
+			echo 'fail';
+		}
+	}
 }
 mysqli_close($con);
 ?>
