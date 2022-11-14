@@ -42,7 +42,7 @@ echo '<div class="container-fluid">
 <div class="row no-gutters setopt" onclick="popupload(\'managesettings?editdeposittype\')"><i class="fa fa-user-edit"></i> &nbsp; Edit deposit type</div>
 <div class="row no-gutters setopt"><i class="fa fa-user-times"></i> &nbsp; Delete deposit type</div>
 <div class="row no-gutters setopt" onclick="popupload(\'loan?charges\')"><i class="fa fa-coins" style="color:green;font-size:20px;"></i>&nbsp; Add Charges </div>
-<!--<div class="row no-gutters setopt" onclick="popupload(\'savemember?updategroupdepo\')"><i class="fa fa-history" style="color:green;font-size:20px;"></i>&nbsp; Update Deposit</div>-->
+<div class="row no-gutters setopt" onclick="popupload(\'savemember?updategroupdepo\')"><i class="fa fa-history" style="color:green;font-size:20px;"></i>&nbsp; Update Deposit</div>
 </div></div>
 <div class="card col-xs-11 col-sm-5 mx-sm-auto mx-lg-4 mx-auto" style="max-width:450px;min-width:300px;min-height:150px;padding:0px;"><div class="card-header" style="text-align:center;height:40px;"><h5><i class="fas fa-gifts" style="color:#4682b4;"></i> &nbsp; Accounting Management</h5></div><div class="card-body" style="font-size:14px;font-family:google-sans,Roboto,\'Open-Sans\',helvetica;padding:0px;">
 <div class="row no-gutters setopt" onclick="popupload(\'managesettings?accountsedit\')"> <i class="fa fa-pencil-alt" style="font-size:20px;color:green;"></i> &nbsp; Edit Account</div>
@@ -483,5 +483,41 @@ function changedepo(val){
         $(".popdiv").html(data);
     })
 
+}
+function glistgroup(vl){
+   $.get('savemember?currentmembers='+vl,(data)=>{$("#cmemberid").html(data)})
+}
+function getactivemember(id){
+    $.get('savemember?activemembers='+id,(data)=>{$("#activedate").html(data)})
+    $("#currentsaves").html('<option> --No Deposit-- </option>')
+}
+function getdepodate(val){
+    
+    $.get('savemember?activedate='+val,(data)=>{$("#currentsaves").html(data)})
+}
+function getallof(){
+    let dat=$("#activedate").val();
+    getdepodate(dat)
+
+}
+function alldatedepos(va){
+    let savs=$("#currentsaves").val();
+    $.get('savemember?currentsavingamount='+va,(data)=>{$("#savingamount").val(data);})
+    $.get('savemember?currentsavingtype='+savs,(data)=>{$("#defaultsave").html(data);})
+
+}
+function updateloan(e){
+    e.preventDefault();
+    let data=$("#updateloan").serialize();
+    $.ajax({method:'POST',url:'savemember',data:data,beforeSend:progress("Updating Account Deposit.."),complete:progress()}).fail(()=>{toast("Internet Connection Error! Sorry, the request could not completed.")}).done((e)=>{
+        console.log(e.trim());
+        if(e.trim()=="success"){
+            toast("Account deposit was updated successfully")
+            popclose()
+        }
+        else{
+            toast("Sorry, the account deposit failed to update");
+        }
+    })
 }
 </script>
