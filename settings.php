@@ -40,7 +40,7 @@ echo '<div class="container-fluid">
 <div class="card col-xs-11 col-sm-5 mx-sm-auto mx-lg-4 mx-auto" style="max-width:450px;min-width:300px;min-height:150px;padding:0px;"><div class="card-header" style="text-align:center;height:40px;"><h5><i class="fas fa-donate" style="color:#4682b4;"></i> &nbsp; Deposit Management</h5></div><div class="card-body" style="font-size:14px;font-family:google-sans,Roboto,\'Open-Sans\',helvetica;padding:0px;">
 <div class="row no-gutters setopt" onclick="addsaving()"><i class="bi bi-plus" style="font-size:20px;color:green;"></i> &nbsp; Add deposit type</div>
 <div class="row no-gutters setopt" onclick="popupload(\'managesettings?editdeposittype\')"><i class="fa fa-user-edit"></i> &nbsp; Edit deposit type</div>
-<div class="row no-gutters setopt"><i class="fa fa-user-times"></i> &nbsp; Delete deposit type</div>
+<!--git<div class="row no-gutters setopt"><i class="fa fa-user-times"></i> &nbsp; Delete deposit type</div>-->
 <div class="row no-gutters setopt" onclick="popupload(\'loan?charges\')"><i class="fa fa-coins" style="color:green;font-size:20px;"></i>&nbsp; Add Charges </div>
 <div class="row no-gutters setopt" onclick="popupload(\'savemember?updategroupdepo\')"><i class="fa fa-history" style="color:green;font-size:20px;"></i>&nbsp; Update Deposit</div>
 </div></div>
@@ -438,7 +438,7 @@ function saveaccount(e){
             })
     }
     else{
-        toast("Fill all fieds before updating the account!")
+        toast("Fill all fields before updating the account!")
     }
         
 }
@@ -513,7 +513,7 @@ function updateloan(e){
         console.log(e.trim());
         if(e.trim()=="success"){
             toast("Account deposit was updated successfully")
-            popclose()
+            closepop();
         }
         else{
             toast("Sorry, the account deposit failed to update");
