@@ -48,7 +48,7 @@ if(isset($_SESSION['csysuser'])){
         
         <div class="card col-sm-10 col-xsm-9 d-flex flex-xs-column flex-sm-row justify-content-center mx-auto" style="max-height:350px;height:auto;max-width:600px;min-width:300px;background:white;position:absolute;right:0;left:0;top:90px;bottom:0;margin:0 auto;">
           <div class="col-4 d-none d-sm-block" style="width:150px;;padding:0;text-align:center;"><img src="assets/img/logo.png" style="width:100px;height:90px;margin-top:50%;">
-          <div class="row no-gutters" style="font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;font-weight:600;font-style:italic;font-size:16px;">Golden Vision Empowerment Program</div>
+          <div class="row no-gutters" style="font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;font-weight:600;font-style:italic;font-size:16px;">TABLE BANKING DEMO</div>
         </div>
           <div class="col-8 log" style="max-height:300px;max-width:300px;width:100%;margin:0 auto;padding:0px;padding-top:10px;">
             <div style="justify-content:center;background:#f0f0f0;border-radius:15px;display:none;z-index:999;position:absolute;width:90%;max-width:300px;margin:auto;min-height:30px;height:auto;text-align:center;" id="logmessage">
