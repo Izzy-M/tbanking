@@ -36,7 +36,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GVEP SYSTEM</title>
+  <title>GVEP BANKING</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <meta charset="utf-8">
   <meta name="viewport"content="width=device-width,initial-scale=1.0,user-scalable=no,user-scalable=0">
@@ -83,7 +83,7 @@
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <div class="brand-link">
       <img src="assets/img/logo.png" alt="GVEP Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-      <span class="brand-text font-weight-heavy">GVEP SYSTEM</span>
+      <span class="brand-text font-weight-heavy">GVEP BANKING</span>
     </div>
 
     <div class="sidebar">
